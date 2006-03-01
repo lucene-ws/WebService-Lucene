@@ -54,7 +54,7 @@ sub new_from_entry {
     
     $self->url( $entry->link );
 
-    $self->relevance( $entry->{ entry }->get( 'http://a9.com/-/spec/opensearch/1.1/', 'relevance' ) );
+    $self->relevance( $entry->get( 'http://a9.com/-/spec/opensearch/1.1/', 'relevance' ) );
     $self->title( $entry->title );
     my $content = $entry->content->body;
 
