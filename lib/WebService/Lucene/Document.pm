@@ -52,7 +52,7 @@ sub new_from_entry {
     my( $class, $entry ) = @_;
     my $self = $class->new;
     
-    $self->url( $entry->link );
+    $self->url( $entry->link->href );
 
     $self->relevance( $entry->get( 'http://a9.com/-/spec/opensearch/1.1/', 'relevance' ) );
     $self->title( $entry->title );
