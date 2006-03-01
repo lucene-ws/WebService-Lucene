@@ -149,8 +149,17 @@ sub as_entry {
     my $entry = XML::Atom::Entry->new;
     $entry->title( $self->title  || 'New Entry' );
     
-    my @properties = map +{ name => $_->name, value => $_->value, class => join( ' ', keys %{ $_->get_info } ) }, $self->fields;
-    my $xml        = $self->xoxoparser->construct( @properties );
+    my @properties;
+    for my $field ( $self->fields ) {
+	my $types = $field->get_info;
+
+        push @properties, {
+		name  => $field->name,
+		value => $field->value,
+                class => join( ' ', grep { $types->{ $_ } } keys %$types )
+        };
+    }
+    my $xml = $self->xoxoparser->construct( @properties );
     
     $entry->content( $xml );
     $entry->content->type( 'xhtml' );
