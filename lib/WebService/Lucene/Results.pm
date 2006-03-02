@@ -66,7 +66,7 @@ sub new_from_feed {
     my $self    = $class->new;
     my @entries = $object->entries;
     
-    $self->documents_ref( \@entries );
+    $self->documents_ref( [ map { $_->{ entry } || $_ } @entries ] );
     $self->object( $object );
     return $self;
 }
