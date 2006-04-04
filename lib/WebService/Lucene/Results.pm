@@ -156,6 +156,20 @@ sub previous_page {
     return $self->_fetch( $self->_get_link( 'previous' ) );
 }
 
+=head2 suggestion
+
+Returns the C<opensearch:querySuggestion> field if it exists.
+
+=cut
+
+sub suggestion {
+    my $self   = shift;
+    my $object = $self->object;
+
+    return unless $object->can( 'feed' );
+    return $object->feed->{ atom }->get( $object->parent->description->ns, 'querySuggestion' );
+}
+
 =head2 _get_link( $type )
 
 Attempts to get a link tag of type C<$type> from an Atom feed.
