@@ -7,6 +7,7 @@ use base qw( WebService::Lucene::Client Class::Accessor::Fast );
 
 use WebService::Lucene::Document;
 use WebService::Lucene::Iterator;
+use Encode;
 
 use Carp;
 
@@ -167,7 +168,9 @@ sub suggestion {
     my $object = $self->object;
 
     return unless $object->can( 'feed' );
-    return $object->feed->{ atom }->get( $object->parent->description->ns, 'querySuggestion' );
+    my $val = $object->feed->{ atom }->get( $object->parent->description->ns, 'querySuggestion' );
+    Encode::_utf8_on( $val );
+    return $val;
 }
 
 =head2 _get_link( $type )
