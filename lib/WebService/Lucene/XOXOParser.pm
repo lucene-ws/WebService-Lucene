@@ -4,7 +4,14 @@ use strict;
 use warnings;
 
 use XML::LibXML;
-use CGI qw( dl dt dd escapeHTML );
+use HTML::Entities qw( encode_entities );
+
+BEGIN {
+    for my $name ( qw( dl dd dt ) ) {
+        no strict 'refs';
+        *$name = sub { _make_element( $name, @_ ) }
+    }
+}
 
 =head1 NAME
 
@@ -84,13 +91,25 @@ sub construct {
                         $_ => $node->{ $_ }
                     } grep { $_ !~ /^(name|value)$/ } keys %$_
                 },
-                escapeHTML( $_->{ name } )
+                encode_entities( $_->{ name } )
             ),
             dd(
-                escapeHTML( $_->{ value } )
+                encode_entities( $_->{ value } )
             )
         } @properties
     );
+}
+
+sub _make_element {
+    my $element = shift;
+    my $output  = "<$element";
+    if( ref $_[ 0 ] ) {
+        my $attrs = shift;
+        $output  .= ' ';
+        $output  .= join( ' ', map { qq($_=") . $attrs->{ $_ } . '"' } keys %$attrs );
+    }
+    $output    .= join( '', '>', @_, "</$element>" );
+    return $output;
 }
 
 =head1 AUTHORS
