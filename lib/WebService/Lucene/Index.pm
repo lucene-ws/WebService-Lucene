@@ -7,6 +7,7 @@ use base qw( WebService::Lucene::Client Class::Accessor::Fast );
 
 use URI;
 use Carp;
+use HTTP::Request;
 
 use WebService::Lucene::Results;
 use WebService::Lucene::Document;
@@ -156,6 +157,18 @@ Returns a L<WebService::Lucene::Results> object with a list of the recently upda
 sub list {
     my( $self ) = @_;
     return WebService::Lucene::Results->new_from_feed( $self->getFeed( $self->url ) );
+}
+
+=head2 optimize( )
+
+Optimizes the index.
+
+=cut
+
+sub optimize {
+    my( $self ) = @_;
+    my $request = HTTP::Request->new( PUT => $self->url . '?optimize' );
+    return $self->make_request( $request );
 }
 
 =head2 add_document( $document )
