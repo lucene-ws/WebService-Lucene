@@ -4,7 +4,6 @@ use strict;
 use warnings;
 
 use XML::LibXML;
-use HTML::Entities qw( encode_entities );
 
 BEGIN {
     for my $name ( qw( dl dd dt ) ) {
@@ -12,6 +11,16 @@ BEGIN {
         *$name = sub { _make_element( $name, @_ ) }
     }
 }
+
+my %pattern_lut = (
+    '&' => 'amp',
+    '<' => 'lt',
+    '>' => 'gt',
+    '"' => 'quot',
+    "'" => 'apos',
+);
+my $pattern = join( '|', keys %pattern_lut );
+
 
 =head1 NAME
 
@@ -110,6 +119,13 @@ sub _make_element {
     }
     $output    .= join( '', '>', @_, "</$element>" );
     return $output;
+}
+
+sub encode_entities {
+    my $value =  shift;
+    $value    =~ s/($pattern)/&$pattern_lut{$1};/gso;
+    
+    return $value;
 }
 
 =head1 AUTHORS
