@@ -63,7 +63,7 @@ Generates a results object from an L<XML::Atom::Feed> object.
 
 sub new_from_feed {
     my( $class, $object ) = @_;
-
+    $class      = ref $class if ref $class;
     my $self    = $class->new;
     my @entries = $object->entries;
     
