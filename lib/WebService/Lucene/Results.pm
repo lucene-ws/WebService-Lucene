@@ -8,6 +8,7 @@ use base qw( WebService::Lucene::Client Class::Accessor::Fast );
 use WebService::Lucene::Document;
 use WebService::Lucene::Iterator;
 use Encode;
+use XML::Atom::Util;
 
 use Carp;
 
@@ -159,16 +160,22 @@ sub previous_page {
 
 =head2 suggestion
 
-Returns the C<opensearch:querySuggestion> field if it exists.
+Returns the C<opensearch:Query>  field with C<rel="correction">if it exists.
 
 =cut
 
 sub suggestion {
     my $self   = shift;
     my $object = $self->object;
+    my $ns     = $object->parent->description->ns;
 
     return unless $object->can( 'feed' );
-    my $val = $object->feed->{ atom }->get( $object->parent->description->ns, 'querySuggestion' );
+    my $val;
+    for( XML::Atom::Util::nodelist( $object->feed->{ atom }->{doc}, $ns, 'Query') ) {
+        next unless $_->getAttribute( 'rel' ) eq 'correction';
+        $val = $_->getAttribute(  'searchTerms' );
+	last;
+    }
     Encode::_utf8_on( $val );
     return $val;
 }
