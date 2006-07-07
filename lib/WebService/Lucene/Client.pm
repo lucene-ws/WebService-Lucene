@@ -5,6 +5,7 @@ use warnings;
 
 use base qw( XML::Atom::Client Class::Accessor::Fast );
 
+use Encode qw( _utf8_on _utf8_off );
 use WWW::OpenSearch;
 use Carp;
 
@@ -89,7 +90,9 @@ sub search {
         $clients->{ $name } = $client;
     }
     
+    _utf8_off( $query );
     my $response = $client->search( $query, $params );
+    _utf8_on( $query );
     
     croak "Search failed: " . $response->status_line unless $response->is_success;
     

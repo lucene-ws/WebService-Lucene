@@ -11,6 +11,7 @@ my $build = Module::Build->new(
 	requires           => {
 		'Class::Accessor' => 0,
 		'Data::Page'      => 0,
+		'Encode'          => 0,
 		'URI'             => 0,
 		'WWW::OpenSearch' => '0.06',
 		'XML::Atom'       => 0,
