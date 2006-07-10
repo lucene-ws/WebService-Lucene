@@ -37,7 +37,7 @@ sub new {
     my $class = shift;
     my $self  = $class->SUPER::new;
     
-    $self->fields_ref( { } );
+    $self->clear_fields;
     
     return $self;
 }
@@ -135,6 +135,16 @@ sub fields {
 	}
 
 	return map { @{ $fieldsref->{ $_ } } } keys %$fieldsref;
+}
+
+=head2 clear_fields( )
+
+Removes all fields from this document
+
+=cut
+
+sub clear_fields {
+    shift->fields_ref({});
 }
 
 =head2 as_entry( )
