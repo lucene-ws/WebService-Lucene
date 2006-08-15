@@ -171,7 +171,7 @@ sub suggestion {
 
     return unless $object->can( 'feed' );
     my $val;
-    for( XML::Atom::Util::nodelist( $object->feed->{ atom }->{doc}, $ns, 'Query') ) {
+    for( XML::Atom::Util::nodelist( $object->feed->{ atom }->elem, $ns, 'Query') ) {
         next unless $_->getAttribute( 'rel' ) eq 'correction';
         $val = $_->getAttribute(  'searchTerms' );
 	last;
