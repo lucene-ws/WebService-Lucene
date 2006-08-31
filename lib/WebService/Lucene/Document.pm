@@ -159,7 +159,7 @@ sub remove_field {
 
     {
         no strict 'refs';
-        undef *{ ref( $self ) . "\::$name" };
+        undef *{ ref( $self ) . "\::$field" };
     }
 
     return delete $self->fields_ref->{ $field };

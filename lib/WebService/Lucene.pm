@@ -200,7 +200,7 @@ sub get_index {
     my( $self, $name ) = @_;
 
     # refresh the service ... this should be fixed at some point
-    $self->fetch_service;
+    # $self->fetch_service;
 
     my @indices = grep { $_->name eq $name || ( $_->title || '' ) eq $name } $self->indices;
 
