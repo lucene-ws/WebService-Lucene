@@ -109,7 +109,7 @@ in list context.
 =cut
 
 sub documents {
-	my $self = shift;
+    my $self = shift;
 
     if( wantarray ) {
         my @documents;
@@ -117,7 +117,7 @@ sub documents {
             push @documents, WebService::Lucene::Document->new_from_entry( $_ );
         }
 
-    	return @documents;
+        return @documents;
     }
     else {
         return WebService::Lucene::Iterator->new( $self->documents_ref );
@@ -174,7 +174,7 @@ sub suggestion {
     for( XML::Atom::Util::nodelist( $object->feed->{ atom }->elem, $ns, 'Query') ) {
         next unless $_->getAttribute( 'rel' ) eq 'correction';
         $val = $_->getAttribute(  'searchTerms' );
-	last;
+    last;
     }
     Encode::_utf8_on( $val );
     return $val;

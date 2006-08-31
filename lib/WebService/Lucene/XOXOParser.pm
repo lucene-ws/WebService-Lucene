@@ -91,7 +91,7 @@ sub construct {
     my( $self, @properties ) = @_;
 
     return dl(
-	{ class => 'xoxo' },
+    { class => 'xoxo' },
         map {
             my $node = $_;
             dt(

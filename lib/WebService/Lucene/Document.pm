@@ -80,21 +80,21 @@ Adds each field to the document.
 =cut
 
 sub add {
-	my $self   = shift;
-	my $fields = $self->fields_ref;
+    my $self   = shift;
+    my $fields = $self->fields_ref;
 
-	while( my $field = shift ) {
-		my $name = $field->name;
-		unless( exists $fields->{ $name } ) {
-			$fields->{ $name } = [];
-		}
+    while( my $field = shift ) {
+        my $name = $field->name;
+        unless( exists $fields->{ $name } ) {
+            $fields->{ $name } = [];
+        }
         unless( $self->can( $name ) ) {
-			no strict 'refs';
-			 *{ ref( $self ) . "\::$name" } = _field_accessor( $name );
+            no strict 'refs';
+             *{ ref( $self ) . "\::$name" } = _field_accessor( $name );
         }
 
-		push @{ $fields->{ $name } }, $field;
-	}
+        push @{ $fields->{ $name } }, $field;
+    }
 }
 
 =head2 title( [$title] )
@@ -125,16 +125,16 @@ is specified.
 =cut
 
 sub fields {
-	my $self      = shift;
-	my $name      = shift;
-	my $fieldsref = $self->fields_ref;
+    my $self      = shift;
+    my $name      = shift;
+    my $fieldsref = $self->fields_ref;
 
-	if( $name ) {
-		my $fields = $fieldsref->{ $name };
-		return ( defined $fields ) ? @$fields : ( );
-	}
+    if( $name ) {
+        my $fields = $fieldsref->{ $name };
+        return ( defined $fields ) ? @$fields : ( );
+    }
 
-	return map { @{ $fieldsref->{ $_ } } } keys %$fieldsref;
+    return map { @{ $fieldsref->{ $_ } } } keys %$fieldsref;
 }
 
 =head2 clear_fields( )
@@ -145,6 +145,24 @@ Removes all fields from this document
 
 sub clear_fields {
     shift->fields_ref({});
+}
+
+=head2 remove_field( $field )
+
+Remove a particular field from the document
+
+=cut
+
+sub remove_field {
+    my $self  = shift;
+    my $field = shift;
+
+    {
+        no strict 'refs';
+        undef *{ ref( $self ) . "\::$name" };
+    }
+
+    return delete $self->fields_ref->{ $field };
 }
 
 =head2 as_entry( )
@@ -161,11 +179,11 @@ sub as_entry {
     
     my @properties;
     for my $field ( $self->fields ) {
-	my $types = $field->get_info;
+    my $types = $field->get_info;
 
         push @properties, {
-		name  => $field->name,
-		value => $field->value,
+        name  => $field->name,
+        value => $field->value,
                 class => join( ' ', grep { $types->{ $_ } } keys %$types )
         };
     }
@@ -207,15 +225,15 @@ Generates a closure for accessing a field.
 =cut
 
 sub _field_accessor {
-	my $name = shift;
-	return sub {
-		my $self   = shift;
-		my $fields = $self->fields_ref->{ $name };
+    my $name = shift;
+    return sub {
+        my $self   = shift;
+        my $fields = $self->fields_ref->{ $name };
 
-		return unless defined $fields;
-		
-		return map { $_->value } ( wantarray ? @$fields : $fields->[ 0 ] );
-	}
+        return unless defined $fields;
+        
+        return map { $_->value } ( wantarray ? @$fields : $fields->[ 0 ] );
+    }
 }
 
 =head1 AUTHORS
