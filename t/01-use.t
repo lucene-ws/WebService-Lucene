@@ -1,11 +1,10 @@
-use Test::More tests => 8;
+use Test::More tests => 7;
 
 use strict;
 use warnings;
 
 BEGIN {
 	use_ok( 'WebService::Lucene' );
-	use_ok( 'WebService::Lucene::Client' );
 	use_ok( 'WebService::Lucene::Document' );
 	use_ok( 'WebService::Lucene::Field' );
 	use_ok( 'WebService::Lucene::Index' );

@@ -61,6 +61,16 @@ WebService::Lucene::Field - Object to represent a field in a document
 
 Creates a new field object from the options provided.
 
+=head2 types( )
+
+Returns the types of fields available.
+
+=cut
+
+sub types {
+    return keys %info;
+}
+
 =head2 text( $name => $value )
 
 Create a new text field.

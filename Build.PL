@@ -13,7 +13,7 @@ my $build = Module::Build->new(
 		'Data::Page'      => 0,
 		'Encode'          => 0,
 		'URI'             => 0,
-		'WWW::OpenSearch' => '0.06',
+		'WWW::OpenSearch' => '0.08',
 		'XML::Atom'       => 0,
 		'XML::LibXML'     => 0,
 	},

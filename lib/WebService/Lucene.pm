@@ -3,19 +3,20 @@ package WebService::Lucene;
 use strict;
 use warnings;
 
-use base qw( WebService::Lucene::Client Class::Accessor::Fast );
+use base qw( XML::Atom::Client Class::Accessor::Fast );
 
-use Carp;
 use URI;
+use Carp qw( croak );
+use WebService::Lucene::Index;
+use WebService::Lucene::XOXOParser;
 use XML::LibXML;
 
-use WebService::Lucene::Index;
-use XML::Atom::Entry;
+our $VERSION = '0.02';
 
-our $VERSION = '0.01';
-
-__PACKAGE__->mk_accessors( qw( base_url properties_url indices_ref title properties ) );
-
+__PACKAGE__->mk_accessors( qw(
+    base_url indices_ref properties_ref title_info
+    service_doc_fetched
+) );
 =head1 NAME
 
 WebService::Lucene - Module to interface with the Lucene indexing webservice
@@ -52,14 +53,13 @@ WebService::Lucene - Module to interface with the Lucene indexing webservice
 =head1 DESCRIPTION
 
 This module is a Perl API in to the Lucene indexing web service.
-http://lucene-ws.sourceforge.net/
+http://lucene-ws.net/
 
 =head1 METHODS
 
 =head2 new( $url )
 
-This method will connect to the Lucene Web Service located at C<$url>,
-load it's settings and initialize all of its indices.
+This method will connect to the Lucene Web Service located at C<$url>.
 
     my $ws = WebService::Lucene->new( 'http://localhost:8080/lucene/' );
 
@@ -68,18 +68,17 @@ load it's settings and initialize all of its indices.
 sub new {
     my( $class, $url ) = @_;
     
-    croak "No URL specified" unless $url;
+    croak( "No URL specified" ) unless $url;
+
+    if( !ref $url ) {
+        $url =~ s{/?$}{/};
+        $url = URI->new( $url );
+    }
 
     my $self = $class->SUPER::new;
-
-    $self->base_url( URI->new( $url ) );
-    $self->properties_url( URI->new_abs( 'service.properties', $self->base_url ) );
-    $self->indices_ref( [ ] );
-    $self->properties( { } );
+    $self->base_url( $url );
+    $self->indices_ref( {} );
     
-    $self->fetch_service;
-    $self->fetch_service_properties;
-
     return $self;
 }
 
@@ -87,91 +86,37 @@ sub new {
 
 Accessor for the base url of the service.
 
-=head2 fetch_service( )
+=head2 get_index( $name )
 
-Connects to the service url and passes the contents on to C<parse_service_xml>.
-
-=cut
-
-sub fetch_service {
-    my( $self ) = @_;
-    $self->parse_service_xml( $self->_fetch_content( $self->base_url ) );
-}
-
-=head2 parse_service_xml( $xml )
-
-Parses the Atom Publishing Protocol introspection document and populates
-the services C<indices>.
+Retuens an L<WebService::Lucene::Index> object for C<$name>.
 
 =cut
 
-sub parse_service_xml {
-    my( $self, $xml ) = @_;
-    
-    my $parser = XML::LibXML->new;
-    my $doc    = $parser->parse_string( $xml );
+sub get_index {
+    my( $self, $name ) = @_;
+    my $indices_ref    = $self->indices_ref;
 
-    my @indices;
-    my( $workspace ) = $doc->documentElement->getChildrenByTagName( 'workspace' );
-
-    $self->title( $workspace->getAttributeNode( 'title' )->value );
-    
-    for my $collection ( $workspace->getChildrenByTagName( 'collection' ) ) {
-        my $url  = $collection->getAttributeNode( 'href' )->value;
-
-        push @indices,
-            WebService::Lucene::Index->new( {
-                url   => URI->new( $url )
-            } )
+    if( ref $name ) {
+        $name = join( ',', @$name );
     }
-    
-    $self->indices_ref( \@indices );
+
+    if( my $index = $indices_ref->{ $name } ) {
+        return $index;
+    }
+
+    # make sure it ends in a slash
+    my $urlname = $name;
+    $urlname =~ s{/?$}{/};
+    $indices_ref->{ $name } = WebService::Lucene::Index->new(
+        URI->new_abs( $urlname, $self->base_url )
+    );
+
+    return $indices_ref->{ $name };    
 }
 
-=head2 title( [$title] )
+=head2 indexes( )
 
-Accessor for the title of the service.
-
-=head2 properties_url( [$url] )
-
-Accessor for the C<service.properties> document url.
-
-=head2 fetch_service_properties( )
-
-Grabs the C<service.properties> documents and sends the contents
-to C<parse_service_properties_xml>.
-
-=cut
-
-sub fetch_service_properties {
-    my( $self ) = @_;
-    my $entry   = $self->getEntry( $self->properties_url );
-    $self->parse_service_properties_xml( $entry->content->body );
-}
-
-=head2 parse_service_properties_xml( $xml )
-
-Parses the XML and populates the object's C<properties>
-
-=cut
-
-sub parse_service_properties_xml {
-    my( $self, $xml ) = @_;
-
-    my $parser = $self->xoxoparser;
-    
-    $self->properties( {
-        map { $_->{ name } => $_->{ value } } $parser->parse( $xml )
-    } );
-}
-
-=head2 properties( [$properties] )
-
-Hash reference to a list of properties for the service.
-
-=head2 indices_ref( [$indices] )
-
-Array reference to a list of indices.
+Alias for C<indices>
 
 =head2 indices( )
 
@@ -179,96 +124,123 @@ Returns an array of L<WebService::Lucene::Index> objects.
 
 =cut
 
+*indexes = \&indices;
 sub indices {
-    return @{ shift->indices_ref };
+    my $self = shift;
+
+    if( !$self->service_doc_fetched ) {
+        $self->_fetch_service_document;
+    }
+
+    my $indices = $self->indices_ref;
+
+    # filter out multi-indicies
+    return map { $indices->{ $_ } } grep { $_ !~ /,/ } keys %$indices;
 }
 
-=head2 search( $query, $options )
+=head2 properties( [$properties] )
 
-Searches one or more indices for C<$query>. Returns an
-L<WebService::Lucene::Results> object.
-
-    my $results = $ws->search( 'foo', { indices => [ $index1, $index2 ] } );
-
-=head2 get_index( $name )
-
-Greps the list of indices to match C<$name> to index's name or title fields.
+Hash reference to a list of properties for the service.
 
 =cut
 
-sub get_index {
-    my( $self, $name ) = @_;
+sub properties {
+    my $self = shift;
 
-    # refresh the service ... this should be fixed at some point
-    # $self->fetch_service;
+    if( !$self->properties_ref ) {
+        $self->_fetch_service_properties;
+    }
 
-    my @indices = grep { $_->name eq $name || ( $_->title || '' ) eq $name } $self->indices;
-
-    return wantarray ? @indices : $indices[ 0 ];
+    return $self->properties_ref;
 }
 
-=head2 create_index( $index )
 
-Given a L<WebService::Lucene::Index> object it will create the
-corresponding index on the server and return a index object.
+=head2 _fetch_service_properties( )
+
+Grabs the C<service.properties> documents and sends the contents
+to C<_parse_service_properties>.
 
 =cut
 
-sub create_index {
-    my( $self, $index ) = @_;
+sub _fetch_service_properties {
+    my( $self ) = @_;
+    my $entry   = $self->getEntry(
+        URI->new_abs( 'service.properties', $self->base_url )
+    );
+    $self->_parse_service_properties( $entry->content->body );
+}
 
-    my $url = $self->createEntry( $self->base_url, $index->properties_as_entry );
-    
-    croak $self->errstr unless $url;
-    
-    return WebService::Lucene::Index->new( {
-        name => $index->name,
-        url  => $url
+=head2 _parse_service_properties( $xml )
+
+Parses the XML and populates the object's C<properties>
+
+=cut
+
+sub _parse_service_properties {
+    my( $self, $xml ) = @_;
+
+    $self->properties_ref( {
+        map {
+            $_->{ name } => $_->{ value }
+        } WebService::Lucene::XOXOParser->parse( $xml )
     } );
 }
 
-=head2 update( )
+=head2 _fetch_service_document( )
 
-Updates the C<service.properties> document.
+Connects to the service url and passes the contents on to
+C<_parse_service_document>.
 
 =cut
 
-sub update {
+sub _fetch_service_document {
     my( $self ) = @_;
-    $self->updateEntry( $self->properties_url, $self->properties_as_entry );
+    $self->_parse_service_document(
+        $self->_fetch_content( $self->base_url )
+    );
+    $self->service_doc_fetched( 1 );
 }
 
-=head2 properties_as_entry( )
+=head2 _parse_service_document( $xml )
 
-Genereates an L<XML::Atom::Entry> suitable for updating
-the C<service.properties> document.
+Parses the Atom Publishing Protocol introspection document and populates
+the service's C<indices>.
 
 =cut
 
-sub properties_as_entry {
-    my( $self ) = @_;
+sub _parse_service_document {
+    my( $self, $xml ) = @_;
     
-    my $entry = XML::Atom::Entry->new;
-    $entry->title( 'service.properties' );
-    
-    my $props      = $self->properties;
-    my @properties = map +{ name => $_, value => $props->{ $_ } }, keys %$props;
-    my $xml        = $self->xoxoparser->construct( @properties );
-    
-    $entry->content( $xml );
-    $entry->content->type( 'xhtml' );
-    
-    return $entry;
+    my $parser  = XML::LibXML->new;
+    my $doc     = $parser->parse_string( $xml );
+    my $indices = $self->indices_ref;
+
+    my( $workspace ) = $doc->documentElement->getChildrenByTagName( 'workspace' );
+
+    $self->title_info( $workspace->getAttributeNode( 'title' )->value );
+
+    for my $collection ( $workspace->getChildrenByTagName( 'collection' ) ) {
+        my $url     = $collection->getAttributeNode( 'href' )->value;
+        my( $name ) = $url =~ m{/([^/]+)/?$};
+        next if exists $indices->{ $name };
+        $indices->{ $name } = WebService::Lucene::Index->new( $url );
+    }
 }
 
-=head2 agent( )
+=head2 title( [$title] )
 
-Shortcut to the L<LWP::UserAgent> object.
+Accessor for the title of the service.
 
 =cut
 
-sub agent {
-    return shift->{ ua };
+sub title {
+    my( $self ) = @_;
+
+    if( !$self->service_doc_fetched ) {
+        $self->_fetch_service_document;
+    }
+
+    return $self->title_info;
 }
 
 =head2 _fetch_content( $url )
@@ -280,13 +252,85 @@ Shortcut for fetching the content at C<$url>.
 sub _fetch_content {
     my( $self, $url ) = @_;
     
-    my $response = $self->agent->get( $url );
-    
-    unless( $response->is_success ) {
-        croak "Error while fetching $url: " . $response->status_line;
-    }
+    my $response = $self->{ ua }->get( $url );
     
     return $response->content;
+}
+
+=head2 create_index( $name )
+
+Creates the index on the server and returns the
+L<WebService::Lucene::Index> object.
+
+=cut
+
+sub create_index {
+    my( $self, $name ) = @_;
+    my $index = $self->get_index( $name );
+    return $index->create;
+}
+
+=head2 delete_index( $name )
+
+Deletes an index.
+
+=cut
+
+sub delete_index {
+    my( $self, $name ) = @_;
+    my $index = $self->get_index( $name );
+    return $index->delete;
+}
+
+=head2 update( )
+
+Updates the C<service.properties> document.
+
+=cut
+
+sub update {
+    my( $self ) = @_;
+    $self->updateEntry(
+        URI->new_abs( 'service.properties', $self->base_url ),
+        $self->_properties_as_entry
+    );
+}
+
+=head2 _properties_as_entry( )
+
+Genereates an L<XML::Atom::Entry> suitable for updating
+the C<service.properties> document.
+
+=cut
+
+sub _properties_as_entry {
+    my( $self ) = @_;
+    
+    my $entry = XML::Atom::Entry->new;
+    $entry->title( 'service.properties' );
+    
+    my $props      = $self->properties_ref;
+    my @properties = map +{ name => $_, value => $props->{ $_ } }, keys %$props;
+    my $xml        = WebService::Lucene::XOXOParser->construct( @properties );
+    
+    $entry->content( $xml );
+    $entry->content->type( 'xhtml' );
+    
+    return $entry;
+}
+
+=head2 search( $indices, $query, [$params] )
+
+Searches one or more indices for C<$query>. Returns an
+L<WebService::Lucene::Results> object.
+
+    my $results = $ws->search( [ 'index1', 'index2' ], 'foo' );
+
+=cut
+
+sub search {
+    my( $self, $name, $query, $params ) = @_;
+    return $self->get_index( $name )->search( $query, $params );
 }
 
 =head1 SEE ALSO
