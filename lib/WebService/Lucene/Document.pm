@@ -165,6 +165,15 @@ A floating point number (0..1) set from search results.
 
 A name-keyed hashref of field objects.
 
+=head2 facets()
+
+Technically an alias for fields. But should only be used when fetching
+facet results.
+
+=cut
+
+*facets = \&fields;
+
 =head2 get( [$name] )
 
 Alias for C<fields>.
