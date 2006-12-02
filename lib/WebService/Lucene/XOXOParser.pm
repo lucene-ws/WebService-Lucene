@@ -99,10 +99,10 @@ sub construct {
                         $_ => $node->{ $_ }
                     } grep { $_ !~ /^(name|value)$/ } keys %$_
                 },
-                encode_entities( $_->{ name } )
+                $self->encode_entities( $_->{ name } )
             ),
             dd(
-                encode_entities( $_->{ value } )
+                $self->encode_entities( $_->{ value } )
             )
         } @properties
     );
@@ -127,6 +127,7 @@ Escapes some chars to their entities.
 =cut
 
 sub encode_entities {
+    my $self  =  shift;
     my $value =  shift;
     $value    =~ s/($pattern)/&$pattern_lut{$1};/gso;
     

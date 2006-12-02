@@ -13,8 +13,8 @@ my $build = Module::Build->new(
 		'Data::Page'      => 0,
 		'Encode'          => 0,
 		'URI'             => 0,
-		'WWW::OpenSearch' => '0.08',
-		'XML::Atom'       => 0,
+		'WWW::OpenSearch' => '0.08', # latest
+		'XML::Atom'       => '0.25', # fixes memleak
 		'XML::LibXML'     => 0,
 	},
 	build_requres      => {
