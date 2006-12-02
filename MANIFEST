@@ -10,6 +10,7 @@ lib/WebService/Lucene/XOXOParser.pm
 MANIFEST			This list of files
 t/01-use.t
 t/10-service.t
+t/13-field.t
 t/15-xoxo.t
 t/98-pod_coverage.t
 t/99-pod.t

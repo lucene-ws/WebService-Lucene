@@ -48,10 +48,10 @@ WebService::Lucene::Field - Object to represent a field in a document
     } );
     
     # or via the 'text' method
-    $field = WebService::Lucene::Field->text( {
+    $field = WebService::Lucene::Field->text(
         name  => 'foo',
         value => 'bar'
-    } );
+    );
 
 =head1 DESCRIPTION
 
