@@ -297,7 +297,8 @@ sub _field_accessor {
 
         return unless defined $fields;
         
-        return map { $_->value } ( wantarray ? @$fields : $fields->[ 0 ] );
+        my @values = map { $_->value } ( wantarray ? @$fields : $fields->[ 0 ] );
+        return wantarray ? @values : $values[ 0 ];
     }
 }
 

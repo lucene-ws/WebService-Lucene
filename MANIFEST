@@ -13,6 +13,7 @@ t/10-service.t
 t/13-field.t
 t/14-document.t
 t/15-xoxo.t
+t/19-results.t
 t/20-live.t
 t/98-pod_coverage.t
 t/99-pod.t
