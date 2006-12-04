@@ -192,7 +192,7 @@ Optimizes the index.
 
 sub optimize {
     my( $self ) = @_;
-    my $request = HTTP::Request->new( PUT => $self->url . '?optimize' );
+    my $request = HTTP::Request->new( PUT => $self->base_url . '?optimize' );
     return $self->make_request( $request );
 }
 
