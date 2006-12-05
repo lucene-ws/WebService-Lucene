@@ -93,7 +93,7 @@ sub new_from_entry {
 
     my @properties = WebService::Lucene::XOXOParser->parse( $content );
 
-    if( $properties[ 0 ]->{ class } ) {
+    if( @properties and $properties[ 0 ]->{ class } ) {
         for my $property ( @properties ) {
             my %attrs = map { $_ => 1 } split( / /, $property->{ class } );
             my $method = 'add_' . WebService::Lucene::Field->get_type( \%attrs );
