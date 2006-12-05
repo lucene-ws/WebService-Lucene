@@ -345,7 +345,7 @@ L<WebService::Lucene::Results> object.
 
 =cut
 
-sub search {
+sub facets {
     my( $self, $name, @rest ) = @_;
     return $self->get_index( $name )->facets( @rest );
 }
