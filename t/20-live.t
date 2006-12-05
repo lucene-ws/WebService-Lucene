@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 plan skip_all => '$ENV{LUCENE_SERVER} not set' unless $ENV{ LUCENE_SERVER };
-plan tests => 33;
+plan tests => 34;
 
 use_ok( 'WebService::Lucene' );
 use_ok( 'WebService::Lucene::Document' );
@@ -85,9 +85,7 @@ is( $doc1->foo, 'bar' );
     my @docs    = $results->documents;
     is( scalar @docs, 1 );
     my %facets = $docs[ 0 ]->facets;
-
-# FIX: facets broken?
-#    is_deeply( \%facets, { bar => 1 } );
+    is_deeply( \%facets, { bar => 1 } );
 }
 
 # search for document
