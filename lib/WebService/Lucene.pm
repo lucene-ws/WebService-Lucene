@@ -332,8 +332,22 @@ L<WebService::Lucene::Results> object.
 =cut
 
 sub search {
-    my( $self, $name, $query, $params ) = @_;
-    return $self->get_index( $name )->search( $query, $params );
+    my( $self, $name, @rest ) = @_;
+    return $self->get_index( $name )->search( @rest );
+}
+
+=head2 facets( $indices, [$params] )
+
+Gets facets for one or more indices. Returns an
+L<WebService::Lucene::Results> object.
+
+    my $results = $ws->facets( [ 'index1', 'index2' ] );
+
+=cut
+
+sub search {
+    my( $self, $name, @rest ) = @_;
+    return $self->get_index( $name )->facets( @rest );
 }
 
 =head1 SEE ALSO
