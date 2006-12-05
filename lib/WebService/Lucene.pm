@@ -100,7 +100,7 @@ sub get_index {
     return $name if Scalar::Util::blessed $name;
 
     if( ref $name ) {
-        $name = join( ',', map { blessed $_ ? $_->name : $_ } @$name );
+        $name = join( ',', map { Scalar::Util::blessed $_ ? $_->name : $_ } @$name );
     }
 
     if( my $index = $indices_ref->{ $name } ) {
