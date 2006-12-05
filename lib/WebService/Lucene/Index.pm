@@ -173,15 +173,17 @@ sub facets {
     );
 }
 
-=head2 list( )
+=head2 list( [$params] )
 
 Returns a L<WebService::Lucene::Results> object with a list of the recently updated documents.
 
 =cut
 
 sub list {
-    my( $self ) = @_;
-    return WebService::Lucene::Results->new_from_feed( $self->getFeed( $self->base_url ) );
+    my( $self, $params ) = @_;
+    my $url = $self->base_url->clone;
+    $url->query_form( $params ) if $params;
+    return WebService::Lucene::Results->new_from_feed( $self->getFeed( $url ) );
 }
 
 =head2 optimize( )
