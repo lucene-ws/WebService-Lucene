@@ -10,6 +10,7 @@ use Carp qw( croak );
 use WebService::Lucene::Index;
 use WebService::Lucene::XOXOParser;
 use XML::LibXML;
+use Scalar::Util ();
 
 our $VERSION = '0.02';
 
@@ -96,8 +97,10 @@ sub get_index {
     my( $self, $name ) = @_;
     my $indices_ref    = $self->indices_ref;
 
+    return $name if Scalar::Util::blessed $name;
+
     if( ref $name ) {
-        $name = join( ',', @$name );
+        $name = join( ',', map { blessed $_ ? $_->name : $_ } @$name );
     }
 
     if( my $index = $indices_ref->{ $name } ) {

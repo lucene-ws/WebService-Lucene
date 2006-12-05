@@ -12,6 +12,7 @@ my $build = Module::Build->new(
 		'Class::Accessor' => 0,
 		'Data::Page'      => 0,
 		'Encode'          => 0,
+                'Scalar::Util'    => 0,
 		'URI'             => 0,
 		'WWW::OpenSearch' => '0.08', # latest
 		'XML::Atom'       => '0.25', # fixes memleak
