@@ -181,7 +181,7 @@ Returns a L<WebService::Lucene::Results> object with a list of the recently upda
 
 sub list {
     my( $self ) = @_;
-    return WebService::Lucene::Results->new_from_feed( $self->getFeed( $self->url ) );
+    return WebService::Lucene::Results->new_from_feed( $self->getFeed( $self->base_url ) );
 }
 
 =head2 optimize( )

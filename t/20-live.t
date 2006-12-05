@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 plan skip_all => '$ENV{LUCENE_SERVER} not set' unless $ENV{ LUCENE_SERVER };
-plan tests => 20;
+plan tests => 28;
 
 use_ok( 'WebService::Lucene' );
 use_ok( 'WebService::Lucene::Document' );
@@ -70,6 +70,65 @@ my $doc1 = $index->get_document( 1 );
 is( $doc1->id, 1 );
 is( $doc1->foo, 'bar' );
 
+# FIX: the index needs a default field set for list() to work!
+$index->properties->{ 'field.default' } = 'foo';
+$index->update;
+
+# list of document
+{
+    my $results = $index->list;
+    my @docs    = $results->documents;
+    is( scalar @docs, 1 );
+    is( $docs[ 0 ]->id, 1 );
+    is( $docs[ 0 ]->foo, 'bar' );
+}
+
+# facets
+{
+    my $results = $index->facets( 'foo' );
+    my @docs    = $results->documents;
+    is( scalar @docs, 1 );
+    my %facets = $docs[ 0 ]->facets;
+
+# FIX: facets broken?
+#    is_deeply( \%facets, { bar => 1 } );
+}
+
+# search for document
+{
+    my $results = $service->search( $index_name, 'bar', { 'lucene:defaultField' => 'foo' } );
+    my @docs    = $results->documents;
+    is( scalar @docs, 1 );
+    is( $docs[ 0 ]->id, 1 );
+    is( $docs[ 0 ]->foo, 'bar' );
+}
+
+# next/prev page
+{
+    my $doc2 = WebService::Lucene::Document->new;
+    $doc2->add_keyword( id => 2 );
+    $doc2->add_text( foo => 'bar' );
+
+    $index->add_document( $doc2 );
+
+    my $res = $index->search( 'bar', { count => 1 } );
+    {
+        my @docs = $res->documents;
+        is( scalar @docs, 1 );
+    }
+# FIX: paging and &amp/& issue
+#    {
+#        $res = $res->next_page;
+#        my @docs = $res->documents;
+#        is( scalar @docs, 1 );
+#    }
+#    {
+#        $res = $res->previous_page;
+#        my @docs = $res->documents;
+#        is( scalar @docs, 1 );
+#    }
+}
+
 $doc1->add_text( foo => 'baz' );
 $doc1->update;
 
@@ -80,4 +139,5 @@ is_deeply( [ $doc1u->foo ], [ qw( bar baz ) ] );
 $index->delete_document( 1 );
 $index->optimize;
 
+# FIX: index isn't removed from disk!
 $service->delete_index( $index_name );
