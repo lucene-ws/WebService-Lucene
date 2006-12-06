@@ -3,7 +3,7 @@ package WebService::Lucene::Document;
 use strict;
 use warnings;
 
-use base qw( XML::Atom::Client Class::Accessor::Fast );
+use base qw( WebService::Lucene::Client Class::Accessor::Fast );
 
 use WebService::Lucene::Field;
 use WebService::Lucene::XOXOParser;

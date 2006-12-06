@@ -3,14 +3,13 @@ package WebService::Lucene::Index;
 use strict;
 use warnings;
 
-use base qw( XML::Atom::Client Class::Accessor::Fast );
+use base qw( WebService::Lucene::Client Class::Accessor::Fast );
 
 use URI;
 use Carp qw( croak );
 use WebService::Lucene::XOXOParser;
 use WebService::Lucene::Results;
 use WebService::Lucene::Document;
-use WebService::Lucene::Exception;
 use XML::Atom::Entry;
 use HTTP::Request;
 use WWW::OpenSearch;
@@ -238,9 +237,6 @@ Returns a L<WebService::Lucene::Document>.
 sub get_document {
     my( $self, $id ) = @_;
     my $entry = $self->getEntry( URI->new_abs( $id, $self->base_url ) );
-
-    my $res = $self->{ response };
-    WebService::Lucene::Exception->throw( $res ) unless $res->is_success;
 
     return WebService::Lucene::Document->new_from_entry( $entry );
 }

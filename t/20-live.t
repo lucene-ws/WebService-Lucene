@@ -62,7 +62,7 @@ isa_ok( $index, 'WebService::Lucene::Index' );
     my $entry = eval { $index->get_document( 1 ) };
     my $e = WebService::Lucene::Exception->caught;
     isa_ok( $e, 'WebService::Lucene::Exception' );
-    is( $e->code, '404' );
+    is( $e->response->code, '404' );
     is( $e->message, q(Document '1' not found.) );
 }
 

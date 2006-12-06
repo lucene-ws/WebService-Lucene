@@ -1,6 +1,7 @@
 Build.PL
 Changes
 lib/WebService/Lucene.pm
+lib/WebService/Lucene/Client.pm
 lib/WebService/Lucene/Document.pm
 lib/WebService/Lucene/Exception.pm
 lib/WebService/Lucene/Field.pm

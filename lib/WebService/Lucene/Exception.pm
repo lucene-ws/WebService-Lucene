@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Exception::Class 'WebService::Lucene::Exception' =>
-    { fields => [ qw( code status message stacktrace ) ] };
+    { fields => [ qw( response entry stacktrace ) ] };
 use base qw( Exception::Class::Base );
 
 use XML::Atom::Entry;
@@ -36,20 +36,32 @@ sub new {
     my( $class, $response ) = @_;
     my $self = $class->SUPER::new;
 
-    $self->{ code   } = $response->code;
-    $self->{ status } = $response->status_line;
+    $self->{ response } = $response;
 
-    my $source = XML::Atom::Entry->new( \$response->content );
-    $self->{ source } = $source;
-    $self->{ message } = $source->summary;
+    my $entry = XML::Atom::Entry->new( \$response->content );
+    $self->{ entry   } = $entry;
+    $self->{ message } = $entry->summary;
 
-    my $content = $source->content;
+    my $content = $entry->content;
     if( $content->type eq 'html' ) {
         $self->{ statcktrace } = $content->body;
     }
 
     return $self;
 }
+
+=head2 response ( )
+
+The L<HTTP::Response> object passed to this exception.
+
+=head2 entry( )
+
+The XML::Atom Entry for the error returned from the server.
+
+=head2 stacktrace( )
+
+If debug mode is enabled, a full stracktrace from the server-side will
+be found here.
 
 =head1 AUTHORS
 
