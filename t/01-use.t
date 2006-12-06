@@ -5,6 +5,7 @@ use warnings;
 
 BEGIN {
     use_ok( 'WebService::Lucene' );
+    use_ok( 'WebService::Lucene::Client' );
     use_ok( 'WebService::Lucene::Document' );
     use_ok( 'WebService::Lucene::Exception' );        
     use_ok( 'WebService::Lucene::Field' );
