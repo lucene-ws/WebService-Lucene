@@ -39,6 +39,13 @@ sub new {
     $self->{ response } = $response;
 
     my $entry = XML::Atom::Entry->new( \$response->content );
+
+    # if lucene-ws is broken, we won't get an XML::Atom::Entry
+    if( !$entry ) {
+        $self->{ message } = $response->message;
+        return $self;
+    }
+
     $self->{ entry   } = $entry;
     $self->{ message } = $entry->summary;
 
