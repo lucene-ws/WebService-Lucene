@@ -7,7 +7,7 @@ use base qw( WebService::Lucene::Client Class::Accessor::Fast );
 
 use WebService::Lucene::Document;
 use WebService::Lucene::Iterator;
-use Encode;
+use Encode qw();
 use XML::Atom::Util;
 
 use Carp;

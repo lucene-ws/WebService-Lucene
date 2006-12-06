@@ -21,7 +21,6 @@ my %pattern_lut = (
 );
 my $pattern = join( '|', keys %pattern_lut );
 
-
 =head1 NAME
 
 WebService::Lucene::XOXOParser - Simple XOXO Parser
@@ -100,10 +99,10 @@ sub construct {
                         $_ => $node->{ $_ }
                     } grep { $_ !~ /^(name|value)$/ } keys %$_
                 },
-                encode_entities( $_->{ name } )
+                $self->encode_entities( $_->{ name } )
             ),
             dd(
-                encode_entities( $_->{ value } )
+                $self->encode_entities( $_->{ value } )
             )
         } @properties
     );
@@ -121,12 +120,31 @@ sub _make_element {
     return $output;
 }
 
+=head2 encode_entities( $value )
+
+Escapes some chars to their entities.
+
+=cut
+
 sub encode_entities {
+    my $self  =  shift;
     my $value =  shift;
     $value    =~ s/($pattern)/&$pattern_lut{$1};/gso;
     
     return $value;
 }
+
+=head2 dl
+
+Shortcut to create a definition list
+
+=head2 dt
+
+Shortcut to create a definition term
+
+=head2 dd
+
+Shortcut to create a definition description
 
 =head1 AUTHORS
 

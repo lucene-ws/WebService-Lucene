@@ -48,10 +48,10 @@ WebService::Lucene::Field - Object to represent a field in a document
     } );
     
     # or via the 'text' method
-    $field = WebService::Lucene::Field->text( {
+    $field = WebService::Lucene::Field->text(
         name  => 'foo',
         value => 'bar'
-    } );
+    );
 
 =head1 DESCRIPTION
 
@@ -60,6 +60,16 @@ WebService::Lucene::Field - Object to represent a field in a document
 =head2 new( $options )
 
 Creates a new field object from the options provided.
+
+=head2 types( )
+
+Returns the types of fields available.
+
+=cut
+
+sub types {
+    return keys %info;
+}
 
 =head2 text( $name => $value )
 

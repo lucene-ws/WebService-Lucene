@@ -6,8 +6,21 @@ use warnings;
 use base qw( WebService::Lucene::Client Class::Accessor::Fast );
 
 use WebService::Lucene::Field;
+use WebService::Lucene::XOXOParser;
+use XML::Atom::Entry;
 
-__PACKAGE__->mk_accessors( qw( fields_ref url title relevance ) );
+__PACKAGE__->mk_accessors( qw( fields_ref base_url title relevance ) );
+
+BEGIN {
+    for my $type ( WebService::Lucene::Field->types ) {
+        no strict 'refs';
+         *{ __PACKAGE__ . "\::add_$type" } = sub {
+            shift->add( 
+                WebService::Lucene::Field->$type( @_ )
+            );
+        }
+    }
+}
 
 =head1 NAME
 
@@ -42,6 +55,24 @@ sub new {
     return $self;
 }
 
+
+=head2 create()
+
+Sends a create request for this document.
+
+=cut
+
+sub create {
+    my( $self ) = @_;
+    my $id  = $self->id;
+    my $url = $self->base_url;
+
+    $url =~ s{$id/?$}{};
+
+    $self->createEntry( $url, $self->as_entry );
+    return $self;   
+}
+
 =head2 new_from_entry( $entry )
 
 Takes an L<XML::Atom::Entry> and constructs a new object.
@@ -52,22 +83,27 @@ sub new_from_entry {
     my( $class, $entry ) = @_;
     my $self = $class->new;
     
-    $self->url( $entry->link->href );
+    if( $entry->link ) {
+        $self->base_url( $entry->link->href );
+    }
 
     $self->relevance( $entry->get( 'http://a9.com/-/spec/opensearch/1.1/', 'relevance' ) );
     $self->title( $entry->title );
     my $content = $entry->content->body;
 
-    for my $property ( $self->xoxoparser->parse( $content ) ) {
-        my %attrs = map { $_ => 1 } split( / /, $property->{ class } );
+    my @properties = WebService::Lucene::XOXOParser->parse( $content );
 
-        $self->add(
-            WebService::Lucene::Field->new( {
-                name  => $property->{ name },
-                value => $property->{ value },
-                type  => WebService::Lucene::Field->get_type( \%attrs )
-            } )
-        );
+    if( @properties and $properties[ 0 ]->{ class } ) {
+        for my $property ( @properties ) {
+            my %attrs = map { $_ => 1 } split( / /, $property->{ class } );
+            my $method = 'add_' . WebService::Lucene::Field->get_type( \%attrs );
+            $self->$method( map { $property->{ $_ } } qw( name value ) );
+        }
+    }
+    else {
+        $self->fields_ref( {
+            $self->title => [ map { $_->{ name } => $_->{value } } @properties ]
+        } );
     }
 
     return $self;
@@ -97,6 +133,26 @@ sub add {
     }
 }
 
+=head2 add_keyword( $name => $value )
+
+Auto-generated shortcuts to add a "keyword" field.
+
+=head2 add_sorted $name => $value )
+
+Auto-generated shortcuts to add a "sorted" field.
+
+=head2 add_text( $name => $value )
+
+Auto-generated shortcuts to add a "keyword" field.
+
+=head2 add_unindexed( $name => $value )
+
+Auto-generated shortcuts to add a "keyword" field.
+
+=head2 add_unstored( $name => $value )
+
+Auto-generated shortcuts to add a "keyword" field.
+
 =head2 title( [$title] )
 
 The title of the document, set from search or listing results.
@@ -108,6 +164,15 @@ A floating point number (0..1) set from search results.
 =head2 fields_ref( [$fields] )
 
 A name-keyed hashref of field objects.
+
+=head2 facets()
+
+Technically an alias for fields. But should only be used when fetching
+facet results.
+
+=cut
+
+*facets = \&fields;
 
 =head2 get( [$name] )
 
@@ -187,7 +252,7 @@ sub as_entry {
                 class => join( ' ', grep { $types->{ $_ } } keys %$types )
         };
     }
-    my $xml = $self->xoxoparser->construct( @properties );
+    my $xml = WebService::Lucene::XOXOParser->construct( @properties );
     
     $entry->content( $xml );
     $entry->content->type( 'xhtml' );
@@ -204,7 +269,7 @@ Updates the document in the index.
 
 sub update {
     my( $self ) = @_;
-    $self->updateEntry( $self->url, $self->as_entry );
+    $self->updateEntry( $self->base_url, $self->as_entry );
 }
 
 =head2 delete( )
@@ -215,7 +280,7 @@ Delete the document from the index.
 
 sub delete {
     my( $self ) = @_;
-    $self->deleteEntry( $self->url );
+    $self->deleteEntry( $self->base_url );
 }
 
 =head2 _field_accessor( $name )
@@ -232,7 +297,8 @@ sub _field_accessor {
 
         return unless defined $fields;
         
-        return map { $_->value } ( wantarray ? @$fields : $fields->[ 0 ] );
+        my @values = map { $_->value } ( wantarray ? @$fields : $fields->[ 0 ] );
+        return wantarray ? @values : $values[ 0 ];
     }
 }
 
