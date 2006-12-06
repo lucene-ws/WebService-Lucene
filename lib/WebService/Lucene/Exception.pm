@@ -63,6 +63,10 @@ The XML::Atom Entry for the error returned from the server.
 If debug mode is enabled, a full stracktrace from the server-side will
 be found here.
 
+=head2 Fields( )
+
+Subclassed method to store an arrayref of extra fields.
+
 =head1 AUTHORS
 
 =over 4
