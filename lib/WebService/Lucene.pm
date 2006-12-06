@@ -18,6 +18,7 @@ __PACKAGE__->mk_accessors( qw(
     base_url indices_ref properties_ref title_info
     service_doc_fetched
 ) );
+
 =head1 NAME
 
 WebService::Lucene - Module to interface with the Lucene indexing webservice

@@ -6,10 +6,11 @@ use strict;
 use warnings;
 
 plan skip_all => '$ENV{LUCENE_SERVER} not set' unless $ENV{ LUCENE_SERVER };
-plan tests => 34;
+plan tests => 38;
 
 use_ok( 'WebService::Lucene' );
 use_ok( 'WebService::Lucene::Document' );
+use_ok( 'WebService::Lucene::Exception' );
 
 my $index_name = '_temp' . $$;
 my $service = WebService::Lucene->new( $ENV{ LUCENE_SERVER } );
@@ -54,6 +55,15 @@ isa_ok( $index, 'WebService::Lucene::Index' );
 {
     my $os_client = $index->opensearch_client;
     isa_ok( $os_client, 'WWW::OpenSearch' );
+}
+
+# exception
+{
+    my $entry = eval { $index->get_document( 1 ) };
+    my $e = WebService::Lucene::Exception->caught;
+    isa_ok( $e, 'WebService::Lucene::Exception' );
+    is( $e->code, '404' );
+    is( $e->message, q(Document '1' not found.) );
 }
 
 my $doc = WebService::Lucene::Document->new;
