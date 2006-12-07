@@ -165,9 +165,13 @@ string arguments.
 sub facets {
     my( $self, $facet, $params ) = @_;
 
-    my $name = ref $facet ? join( ',', @$facet ) : $facet;
-    my $url  = URI->new_abs( "facets/$name", $self->base_url );
-    $url->query_form( $params );
+    my $name   = ref $facet ? join( ',', @$facet ) : $facet;
+    my $client = $self->opensearch_client;
+
+    my $os_url = $client->description->get_best_url;
+    my $url    = $os_url->prepare_query( $params );
+    $url->path( $url->path . "/facets/$name" );
+
     return WebService::Lucene::Results->new_from_feed(
         $self->getFeed( $url )
     );
