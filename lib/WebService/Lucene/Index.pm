@@ -228,7 +228,7 @@ Adds C<$document> to the index.
 
 sub add_document {
     my( $self, $document ) = @_;
-    $document->base_url( URI->new_abs( $document->id, $self->base_url ) );
+    $document->base_url( URI->new_abs( 'new', $self->base_url ) );
     return $document->create;
 }
 

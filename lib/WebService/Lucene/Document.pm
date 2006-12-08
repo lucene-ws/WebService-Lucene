@@ -64,12 +64,13 @@ Sends a create request for this document.
 
 sub create {
     my( $self ) = @_;
-    my $id  = $self->id;
     my $url = $self->base_url;
 
-    $url =~ s{$id/?$}{};
+    $url =~ s{[^/]+/?$}{};
 
-    $self->createEntry( $url, $self->as_entry );
+    my $new_url = $self->createEntry( $url, $self->as_entry );
+    $self->base_url( $new_url );
+
     return $self;   
 }
 
