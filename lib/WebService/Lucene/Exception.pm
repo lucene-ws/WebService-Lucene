@@ -71,6 +71,10 @@ The XML::Atom Entry for the error returned from the server.
 If debug mode is enabled, a full stracktrace from the server-side will
 be found here.
 
+=head2 type ( )
+
+Returns the type of exception the lucene web service has thrown.
+
 =head2 Fields( )
 
 Subclassed method to store an arrayref of extra fields.
