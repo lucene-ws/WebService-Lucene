@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Exception::Class 'WebService::Lucene::Exception' =>
-    { fields => [ qw( response entry stacktrace ) ] };
+    { fields => [ qw( response entry stacktrace type ) ] };
 use base qw( Exception::Class::Base );
 
 use XML::Atom::Entry;
@@ -48,6 +48,7 @@ sub new {
 
     $self->{ entry   } = $entry;
     $self->{ message } = $entry->summary;
+    $self->{ type    } = $entry->title;
 
     my $content = $entry->content;
     if( $content->type eq 'html' ) {

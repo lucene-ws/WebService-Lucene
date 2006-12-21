@@ -7,6 +7,7 @@ use base qw( WebService::Lucene::Client Class::Accessor::Fast );
 
 use WebService::Lucene::Document;
 use WebService::Lucene::Iterator;
+use WebService::Lucene::Exception;
 use Encode qw();
 use XML::Atom::Util;
 
@@ -81,6 +82,11 @@ Generates a results object from an L<WWW::OpenSearch::Results> object.
 
 sub new_from_opensearch {
     my( $class, $object ) = @_;
+
+    if( !$object->is_success ) {
+        WebService::Lucene::Exception->throw( $object );
+    }
+
     my $self = $class->new_from_feed( $object->feed );
 
     $self->pager( $object->pager );
