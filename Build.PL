@@ -15,7 +15,7 @@ my $build = Module::Build->new(
         'Exception::Class' => 0,
         'Scalar::Util'     => 0,
         'URI'              => 0,
-        'WWW::OpenSearch'  => '0.09', # latest
+        'WWW::OpenSearch'  => '0.09', # handles atom
         'XML::Atom'        => '0.25', # fixes memleak
         'XML::LibXML'      => 0,
     },
