@@ -127,15 +127,15 @@ use WWW::OpenSearch::Response;
 	</entry>
 </feed>
 
-    my $mock_desc   = { ns => 'http://a9.com/-/spec/opensearch/1.1/' };
-    bless $mock_desc, 'WWW::OpenSearch::Description';
-    my $mock_parent = { description => $mock_desc };
-    bless $mock_parent, 'WWW::OpenSearch';
+    my $mock_req = bless {
+        opensearch_url => bless { ns => 'http://a9.com/-/spec/opensearch/1.1/' }, 'WWW::OpenSearch::Url'
+    }, 'WWW::OpenSearch::Request';
 
     my $mock_res = HTTP::Response->new( 200 );
     $mock_res->content( $xml );
+    $mock_res->request( $mock_req );
 
-    my $mock_open_res = WWW::OpenSearch::Response->new( $mock_parent, $mock_res );
+    my $mock_open_res = WWW::OpenSearch::Response->new( $mock_res );
 
     my $results = WebService::Lucene::Results->new_from_opensearch( $mock_open_res );
 

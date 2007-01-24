@@ -173,7 +173,7 @@ Returns the C<opensearch:Query>  field with C<rel="correction">if it exists.
 sub suggestion {
     my $self   = shift;
     my $object = $self->object;
-    my $ns     = $object->parent->description->ns;
+    my $ns     = $object->request->opensearch_url->ns;
 
     return unless $object->can( 'feed' );
     my $val;
