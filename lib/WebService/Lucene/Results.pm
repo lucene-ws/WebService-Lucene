@@ -179,18 +179,25 @@ Alias for C<suggestion()>.
 *suggestions = \&suggestion;
 sub suggestion {
     my $self   = shift;
-    my $object = $self->object;
-    my $ns     = $object->request->opensearch_url->ns;
+    return unless $self->object->can( 'feed' );
 
-    return unless $object->can( 'feed' );
     my @vals;
-    for( XML::Atom::Util::nodelist( $object->feed->{ atom }->elem, $ns, 'Query') ) {
+    for( $self->_os_nodelist( 'Query' ) ) {
         next unless $_->getAttribute( 'rel' ) eq 'correction';
         my $val = $_->getAttribute(  'searchTerms' );
         Encode::_utf8_on( $val );
         push @vals, $val;
     }
     return wantarray ? @vals : $vals[ 0 ];
+}
+
+sub _os_nodelist {
+    my $self   = shift;
+    my $elem   = shift;
+    my $object = $self->object;
+    my $ns     = $object->request->opensearch_url->ns;
+
+    return XML::Atom::Util::nodelist( $object->feed->{ atom }->elem, $ns, $elem );
 }
 
 =head2 _get_link( $type )
