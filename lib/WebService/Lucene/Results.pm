@@ -166,24 +166,31 @@ sub previous_page {
 
 =head2 suggestion
 
-Returns the C<opensearch:Query>  field with C<rel="correction">if it exists.
+Returns the C<opensearch:Query> field with C<rel="correction"> if it exists.
+In list context, returns the full list. In scalar context only the first
+suggestion is returned.
+
+=head2 suggestions
+
+Alias for C<suggestion()>.
 
 =cut
 
+*suggestions = \&suggestion;
 sub suggestion {
     my $self   = shift;
     my $object = $self->object;
     my $ns     = $object->request->opensearch_url->ns;
 
     return unless $object->can( 'feed' );
-    my $val;
+    my @vals;
     for( XML::Atom::Util::nodelist( $object->feed->{ atom }->elem, $ns, 'Query') ) {
         next unless $_->getAttribute( 'rel' ) eq 'correction';
-        $val = $_->getAttribute(  'searchTerms' );
-    last;
+        my $val = $_->getAttribute(  'searchTerms' );
+        Encode::_utf8_on( $val );
+        push @vals, $val;
     }
-    Encode::_utf8_on( $val );
-    return $val;
+    return wantarray ? @vals : $vals[ 0 ];
 }
 
 =head2 _get_link( $type )

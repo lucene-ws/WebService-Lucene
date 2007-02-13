@@ -1,4 +1,4 @@
-use Test::More tests => 25;
+use Test::More tests => 26;
 
 use strict;
 use warnings;
@@ -95,6 +95,7 @@ use WWW::OpenSearch::Response;
 	<opensearch:link href="http://localhost:8080/lucene/test/opensearchdescription.xml" rel="search" type="application/opensearchdescription+xml"/>
 	<opensearch:Query rel="request" searchTerms="test"/>
 	<opensearch:Query rel="correction" searchTerms="test_correction"/>
+	<opensearch:Query rel="correction" searchTerms="test_correction2"/>
 	<title>Search results for query 'test' on index 'Test Index'</title>
 	<link href="http://localhost:8080/lucene/test/?query=test&amp;page=1" rel="self" type="application/atom+xml"/>
 	<link href="http://localhost:8080/lucene/test/?query=test&amp;page=1" rel="first" type="application/atom+xml"/>
@@ -167,5 +168,6 @@ use WWW::OpenSearch::Response;
     }
 
     is( $results->suggestion, 'test_correction' );
+    is_deeply( [ $results->suggestions ], [ qw( test_correction test_correction2 ) ] );
     isa_ok( $results->pager, 'Data::Page' );
 }
