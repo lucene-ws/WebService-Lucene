@@ -38,7 +38,7 @@ sub new {
 
     $self->{ response } = $response;
 
-    my $entry = XML::Atom::Entry->new( \$response->content );
+    my $entry = eval { XML::Atom::Entry->new( \$response->content ) };
 
     # if lucene-ws is broken, we won't get an XML::Atom::Entry
     if( !$entry ) {

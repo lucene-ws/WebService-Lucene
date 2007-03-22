@@ -320,6 +320,25 @@ sub search {
     return WebService::Lucene::Results->new_from_opensearch( $response );
 }
 
+=head2 exists( )
+
+True if the index exists on the server, otherwise false is returned.
+
+=cut
+
+sub exists {
+    my( $self ) = @_;
+    my $request  = HTTP::Request->new(HEAD => $self->base_url);
+    my $response = eval { $self->make_request( $request ); };
+
+    if( my $e = WebService::Lucene::Exception->caught ) {
+        return 0 if $e->response->code eq '404';
+        $e->rethrow;
+    }    
+    
+    return 1; 
+}
+
 =head1 AUTHORS
 
 =over 4
