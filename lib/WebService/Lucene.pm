@@ -359,6 +359,8 @@ sub facets {
 
 =item * L<WWW::OpenSearch>
 
+=item * http://lucene-ws.net/
+
 =back
 
 =head1 AUTHORS
