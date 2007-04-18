@@ -11,7 +11,7 @@ __PACKAGE__->mk_accessors( qw( iterator ) );
 
 =head1 NAME
 
-WebService::Lucene::Interator - Interator for lazy document inflation
+WebService::Lucene::Iterator - Iterator for lazy document inflation
 
 =head1 SYNOPSIS
 
