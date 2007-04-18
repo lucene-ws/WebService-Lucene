@@ -1,5 +1,8 @@
 Revision history for Perl extension WebService::Lucene
 
+0.03  Tue Apr 17 2007
+    - released to CPAN
+
 0.02  Wed Dec 06 2006
     - overhauled to minimize network traffic and handle
       exceptions properly

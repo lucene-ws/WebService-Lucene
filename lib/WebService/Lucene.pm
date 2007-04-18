@@ -12,7 +12,7 @@ use WebService::Lucene::XOXOParser;
 use XML::LibXML;
 use Scalar::Util ();
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 __PACKAGE__->mk_accessors( qw(
     base_url indices_ref properties_ref title_info
