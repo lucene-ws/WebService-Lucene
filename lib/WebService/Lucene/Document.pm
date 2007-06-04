@@ -28,7 +28,7 @@ WebService::Lucene::Document - Object to represent a Lucene Document
 
 =head1 SYNOPSIS
 
-    # Create a bew document
+    # Create a new document
     $doc = WebService::Lucene::Document->new;
     
     # add a field

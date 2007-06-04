@@ -1,5 +1,8 @@
 Revision history for Perl extension WebService::Lucene
 
+0.04  Mon Jun 04 2007
+    - pod fixes
+
 0.03  Tue Apr 17 2007
     - released to CPAN
 
