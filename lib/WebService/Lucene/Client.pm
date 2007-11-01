@@ -25,10 +25,10 @@ overloaded method to throw a L<WebService::Lucene::Exception> on failure.
 =cut
 
 sub make_request {
-    my( $self, @rest ) = @_;
+    my ( $self, @rest ) = @_;
     my $response = $self->SUPER::make_request( @rest );
 
-    if( !$response->is_success ) {
+    if ( !$response->is_success ) {
         WebService::Lucene::Exception->throw( $response );
     }
 

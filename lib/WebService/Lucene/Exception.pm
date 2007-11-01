@@ -33,7 +33,7 @@ Constructs a new exception from an HTTP::Response.
 =cut
 
 sub new {
-    my( $class, $response ) = @_;
+    my ( $class, $response ) = @_;
     my $self = $class->SUPER::new;
 
     $self->{ response } = $response;
@@ -41,17 +41,17 @@ sub new {
     my $entry = eval { XML::Atom::Entry->new( \$response->content ) };
 
     # if lucene-ws is broken, we won't get an XML::Atom::Entry
-    if( !$entry ) {
+    if ( !$entry ) {
         $self->{ message } = $response->message;
         return $self;
     }
 
-    $self->{ entry   } = $entry;
+    $self->{ entry }   = $entry;
     $self->{ message } = $entry->summary;
-    $self->{ type    } = $entry->title;
+    $self->{ type }    = $entry->title;
 
     my $content = $entry->content;
-    if( $content->type eq 'html' ) {
+    if ( $content->type eq 'html' ) {
         $self->{ statcktrace } = $content->body;
     }
 

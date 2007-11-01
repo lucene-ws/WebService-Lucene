@@ -35,18 +35,20 @@ C<$documents> as requested.
 =cut
 
 sub new {
-    my( $class, $documents ) = @_;
-    
+    my ( $class, $documents ) = @_;
+
     my $self  = $class->SUPER::new;
     my $index = 0;
 
-    $self->iterator( sub {
-        my $document = $documents->[ $index ];
-        return undef unless $document;
-        $index++;
-        return WebService::Lucene::Document->new_from_entry( $document );
-    } );
-    
+    $self->iterator(
+        sub {
+            my $document = $documents->[ $index ];
+            return undef unless $document;
+            $index++;
+            return WebService::Lucene::Document->new_from_entry( $document );
+        }
+    );
+
     return $self;
 }
 
@@ -61,7 +63,7 @@ Inflates and returns the next document object.
 =cut
 
 sub next {
-    return shift->iterator->( );
+    return shift->iterator->();
 }
 
 =head1 AUTHORS

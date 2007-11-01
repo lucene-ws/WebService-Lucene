@@ -14,11 +14,9 @@ __PACKAGE__->mk_accessors( qw( fields_ref base_url title relevance ) );
 BEGIN {
     for my $type ( WebService::Lucene::Field->types ) {
         no strict 'refs';
-         *{ __PACKAGE__ . "\::add_$type" } = sub {
-            shift->add( 
-                WebService::Lucene::Field->$type( @_ )
-            );
-        }
+        *{ __PACKAGE__ . "\::add_$type" } = sub {
+            shift->add( WebService::Lucene::Field->$type( @_ ) );
+            }
     }
 }
 
@@ -49,12 +47,11 @@ Creates an empty document.
 sub new {
     my $class = shift;
     my $self  = $class->SUPER::new;
-    
+
     $self->clear_fields;
-    
+
     return $self;
 }
-
 
 =head2 create()
 
@@ -63,7 +60,7 @@ Sends a create request for this document.
 =cut
 
 sub create {
-    my( $self ) = @_;
+    my ( $self ) = @_;
     my $url = $self->base_url;
 
     $url =~ s{[^/]+/?$}{};
@@ -71,7 +68,7 @@ sub create {
     my $new_url = $self->createEntry( $url, $self->as_entry );
     $self->base_url( $new_url );
 
-    return $self;   
+    return $self;
 }
 
 =head2 new_from_entry( $entry )
@@ -81,30 +78,34 @@ Takes an L<XML::Atom::Entry> and constructs a new object.
 =cut
 
 sub new_from_entry {
-    my( $class, $entry ) = @_;
+    my ( $class, $entry ) = @_;
     my $self = $class->new;
-    
-    if( $entry->link ) {
+
+    if ( $entry->link ) {
         $self->base_url( $entry->link->href );
     }
 
-    $self->relevance( $entry->get( 'http://a9.com/-/spec/opensearch/1.1/', 'relevance' ) );
+    $self->relevance(
+        $entry->get( 'http://a9.com/-/spec/opensearch/1.1/', 'relevance' ) );
     $self->title( $entry->title );
     my $content = $entry->content->body;
 
     my @properties = WebService::Lucene::XOXOParser->parse( $content );
 
-    if( @properties and $properties[ 0 ]->{ class } ) {
+    if ( @properties and $properties[ 0 ]->{ class } ) {
         for my $property ( @properties ) {
             my %attrs = map { $_ => 1 } split( / /, $property->{ class } );
-            my $method = 'add_' . WebService::Lucene::Field->get_type( \%attrs );
+            my $method
+                = 'add_' . WebService::Lucene::Field->get_type( \%attrs );
             $self->$method( map { $property->{ $_ } } qw( name value ) );
         }
     }
     else {
-        $self->fields_ref( {
-            $self->title => [ map { $_->{ name } => $_->{value } } @properties ]
-        } );
+        $self->fields_ref(
+            {   $self->title =>
+                    [ map { $_->{ name } => $_->{ value } } @properties ]
+            }
+        );
     }
 
     return $self;
@@ -120,14 +121,14 @@ sub add {
     my $self   = shift;
     my $fields = $self->fields_ref;
 
-    while( my $field = shift ) {
+    while ( my $field = shift ) {
         my $name = $field->name;
-        unless( exists $fields->{ $name } ) {
+        unless ( exists $fields->{ $name } ) {
             $fields->{ $name } = [];
         }
-        unless( $self->can( $name ) ) {
+        unless ( $self->can( $name ) ) {
             no strict 'refs';
-             *{ ref( $self ) . "\::$name" } = _field_accessor( $name );
+            *{ ref( $self ) . "\::$name" } = _field_accessor( $name );
         }
 
         push @{ $fields->{ $name } }, $field;
@@ -195,9 +196,9 @@ sub fields {
     my $name      = shift;
     my $fieldsref = $self->fields_ref;
 
-    if( $name ) {
+    if ( $name ) {
         my $fields = $fieldsref->{ $name };
-        return ( defined $fields ) ? @$fields : ( );
+        return ( defined $fields ) ? @$fields : ();
     }
 
     return map { @{ $fieldsref->{ $_ } } } keys %$fieldsref;
@@ -210,7 +211,7 @@ Removes all fields from this document
 =cut
 
 sub clear_fields {
-    shift->fields_ref({});
+    shift->fields_ref( {} );
 }
 
 =head2 remove_field( $field )
@@ -238,26 +239,27 @@ Generates an L<XML::Atom::Entry> object for the current document.
 =cut
 
 sub as_entry {
-    my( $self ) = @_;
+    my ( $self ) = @_;
 
     my $entry = XML::Atom::Entry->new;
-    $entry->title( $self->title  || 'New Entry' );
-    
+    $entry->title( $self->title || 'New Entry' );
+
     my @properties;
     for my $field ( $self->fields ) {
-    my $types = $field->get_info;
+        my $types = $field->get_info;
 
-        push @properties, {
-        name  => $field->name,
-        value => $field->value,
-                class => join( ' ', grep { $types->{ $_ } } keys %$types )
-        };
+        push @properties,
+            {
+            name  => $field->name,
+            value => $field->value,
+            class => join( ' ', grep { $types->{ $_ } } keys %$types )
+            };
     }
     my $xml = WebService::Lucene::XOXOParser->construct( @properties );
-    
+
     $entry->content( $xml );
     $entry->content->type( 'xhtml' );
-    
+
     return $entry;
 
 }
@@ -269,7 +271,7 @@ Updates the document in the index.
 =cut
 
 sub update {
-    my( $self ) = @_;
+    my ( $self ) = @_;
     $self->updateEntry( $self->base_url, $self->as_entry );
 }
 
@@ -280,7 +282,7 @@ Delete the document from the index.
 =cut
 
 sub delete {
-    my( $self ) = @_;
+    my ( $self ) = @_;
     $self->deleteEntry( $self->base_url );
 }
 
@@ -297,10 +299,11 @@ sub _field_accessor {
         my $fields = $self->fields_ref->{ $name };
 
         return unless defined $fields;
-        
-        my @values = map { $_->value } ( wantarray ? @$fields : $fields->[ 0 ] );
+
+        my @values
+            = map { $_->value } ( wantarray ? @$fields : $fields->[ 0 ] );
         return wantarray ? @values : $values[ 0 ];
-    }
+        }
 }
 
 =head1 AUTHORS

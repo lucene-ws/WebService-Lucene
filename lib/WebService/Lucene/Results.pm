@@ -52,7 +52,7 @@ sub new {
     my $class = shift;
     my $self  = $class->SUPER::new;
 
-    $self->documents_ref( [ ] );
+    $self->documents_ref( [] );
 
     return $self;
 }
@@ -64,11 +64,11 @@ Generates a results object from an L<XML::Atom::Feed> object.
 =cut
 
 sub new_from_feed {
-    my( $class, $object ) = @_;
-    $class      = ref $class if ref $class;
+    my ( $class, $object ) = @_;
+    $class = ref $class if ref $class;
     my $self    = $class->new;
     my @entries = $object->entries;
-    
+
     $self->documents_ref( [ map { $_->{ entry } || $_ } @entries ] );
     $self->object( $object );
     return $self;
@@ -81,9 +81,9 @@ Generates a results object from an L<WWW::OpenSearch::Results> object.
 =cut
 
 sub new_from_opensearch {
-    my( $class, $object ) = @_;
+    my ( $class, $object ) = @_;
 
-    if( !$object->is_success ) {
+    if ( !$object->is_success ) {
         WebService::Lucene::Exception->throw( $object );
     }
 
@@ -117,10 +117,11 @@ in list context.
 sub documents {
     my $self = shift;
 
-    if( wantarray ) {
+    if ( wantarray ) {
         my @documents;
-        for( @{ $self->documents_ref } ) {
-            push @documents, WebService::Lucene::Document->new_from_entry( $_ );
+        for ( @{ $self->documents_ref } ) {
+            push @documents,
+                WebService::Lucene::Document->new_from_entry( $_ );
         }
 
         return @documents;
@@ -139,11 +140,11 @@ Goes to the next page of results.
 sub next_page {
     my $self   = shift;
     my $object = $self->object;
-    
-    if( $object->can( 'next_page' ) ) {
+
+    if ( $object->can( 'next_page' ) ) {
         return $self->new_from_opensearch( $object->next_page );
     }
-    
+
     return $self->_fetch( $self->_get_link( 'next' ) );
 }
 
@@ -156,11 +157,11 @@ Goes to the previous page of results.
 sub previous_page {
     my $self   = shift;
     my $object = $self->object;
-    
-    if( $object->can( 'previous_page' ) ) {
+
+    if ( $object->can( 'previous_page' ) ) {
         return $self->new_from_opensearch( $object->previous_page );
     }
-    
+
     return $self->_fetch( $self->_get_link( 'previous' ) );
 }
 
@@ -177,14 +178,15 @@ Alias for C<suggestion()>.
 =cut
 
 *suggestions = \&suggestion;
+
 sub suggestion {
-    my $self   = shift;
+    my $self = shift;
     return unless $self->object->can( 'feed' );
 
     my @vals;
-    for( $self->_os_nodelist( 'Query' ) ) {
+    for ( $self->_os_nodelist( 'Query' ) ) {
         next unless $_->getAttribute( 'rel' ) eq 'correction';
-        my $val = $_->getAttribute(  'searchTerms' );
+        my $val = $_->getAttribute( 'searchTerms' );
         Encode::_utf8_on( $val );
         push @vals, $val;
     }
@@ -197,7 +199,8 @@ sub _os_nodelist {
     my $object = $self->object;
     my $ns     = $object->request->opensearch_url->ns;
 
-    return XML::Atom::Util::nodelist( $object->feed->{ atom }->elem, $ns, $elem );
+    return XML::Atom::Util::nodelist( $object->feed->{ atom }->elem, $ns,
+        $elem );
 }
 
 =head2 _get_link( $type )
@@ -210,10 +213,10 @@ sub _get_link {
     my $self = shift;
     my $type = shift;
     my $feed = $self->object;
-    
+
     return unless $feed;
-    
-    for( $feed->link ) {
+
+    for ( $feed->link ) {
         return $_->href if $_->rel eq $type;
     }
 }
@@ -230,11 +233,11 @@ sub _fetch {
     my $url  = shift;
 
     return undef unless $url;
-    
-    my $feed  = $self->getFeed( $url );
-    
+
+    my $feed = $self->getFeed( $url );
+
     croak "Error getting list: " . $self->errstr unless $feed;
-    
+
     return $self->new_from_feed( $feed );
 }
 

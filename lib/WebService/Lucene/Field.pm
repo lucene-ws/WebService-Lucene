@@ -6,31 +6,31 @@ use warnings;
 use base qw( Class::Accessor::Fast );
 
 my %info = (
-	text => {
-		stored    => 1,
-		indexed   => 1,
-		tokenized => 1
-	},
-	keyword => {
-		stored    => 1,
-		indexed   => 1,
-		tokenized => 0
-	},
-	unindexed => {
-		stored    => 1,
-		indexed   => 0,
-		tokenized => 0
-	},
-	unstored => {
-		stored    => 0,
-		indexed   => 1,
-		tokenized => 1
-	},
-	sorted => {
-		stored    => 0,
-		indexed   => 1,
-		tokenized => 0
-	}
+    text => {
+        stored    => 1,
+        indexed   => 1,
+        tokenized => 1
+    },
+    keyword => {
+        stored    => 1,
+        indexed   => 1,
+        tokenized => 0
+    },
+    unindexed => {
+        stored    => 1,
+        indexed   => 0,
+        tokenized => 0
+    },
+    unstored => {
+        stored    => 0,
+        indexed   => 1,
+        tokenized => 1
+    },
+    sorted => {
+        stored    => 0,
+        indexed   => 1,
+        tokenized => 0
+    }
 );
 
 __PACKAGE__->mk_accessors( qw( name value type ) );
@@ -78,7 +78,7 @@ Create a new text field.
 =cut
 
 sub text {
-	return shift->_new_as( 'text', @_ );
+    return shift->_new_as( 'text', @_ );
 }
 
 =head2 keyword( $name => $value )
@@ -88,7 +88,7 @@ Create a new keyword field.
 =cut
 
 sub keyword {
-	return shift->_new_as( 'keyword', @_ );
+    return shift->_new_as( 'keyword', @_ );
 }
 
 =head2 unindexed( $name => $value )
@@ -98,7 +98,7 @@ Creates a new unindexed field.
 =cut
 
 sub unindexed {
-	return shift->_new_as( 'unindexed', @_ );
+    return shift->_new_as( 'unindexed', @_ );
 }
 
 =head2 unstored( $name => $value )
@@ -108,7 +108,7 @@ Creates a new unstored field.
 =cut
 
 sub unstored {
-	return shift->_new_as( 'unstored', @_ );
+    return shift->_new_as( 'unstored', @_ );
 }
 
 =head2 sorted( $name => $value )
@@ -118,7 +118,7 @@ Creates a new sorted field.
 =cut
 
 sub sorted {
-	return shift->_new_as( 'sorted', @_ );
+    return shift->_new_as( 'sorted', @_ );
 }
 
 =head2 _new_as( $type, $name => $value )
@@ -128,7 +128,7 @@ A shorter way to generate a field object.
 =cut
 
 sub _new_as {
-	return shift->new( { type => shift, name => shift, value => shift  } );
+    return shift->new( { type => shift, name => shift, value => shift } );
 }
 
 =head2 is_stored( )
@@ -137,8 +137,8 @@ Will the field be stored in the index?
 
 =cut
 
-sub is_stored{
-	return $info{ shift->type }->{ stored }
+sub is_stored {
+    return $info{ shift->type }->{ stored };
 }
 
 =head2 is_indexed( )
@@ -148,7 +148,7 @@ Will the field be indexed?
 =cut
 
 sub is_indexed {
-	return $info{ shift->type }->{ indexed }
+    return $info{ shift->type }->{ indexed };
 }
 
 =head2 is_tokenized( )
@@ -158,7 +158,7 @@ Will the field be tokenized in the index?
 =cut
 
 sub is_tokenized {
-	return $info{ shift->type }->{ tokenized }
+    return $info{ shift->type }->{ tokenized };
 }
 
 =head2 get_info( [$type] )
@@ -168,10 +168,10 @@ Returns a hashref of info for the current or specified type.
 =cut
 
 sub get_info {
-    my( $self, $type ) = @_;
-    
+    my ( $self, $type ) = @_;
+
     $type ||= $self->type;
-    
+
     return $info{ $type };
 }
 
@@ -183,16 +183,17 @@ it will return the type of field.
 =cut
 
 sub get_type {
-    my( $class, $args ) = @_;
+    my ( $class, $args ) = @_;
 
     for my $type ( keys %info ) {
         my $data  = $info{ $type };
         my $match = 1;
-        
+
         for ( keys %$data ) {
-            $match = 0 && last unless !($data->{ $_ } ^ ( $args->{ $_ } || 0 ) );
+            $match = 0 && last
+                unless !( $data->{ $_ } ^ ( $args->{ $_ } || 0 ) );
         }
-        
+
         return $type if $match;
     }
 }

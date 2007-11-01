@@ -12,12 +12,14 @@ use WebService::Lucene::XOXOParser;
 use XML::LibXML;
 use Scalar::Util ();
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
-__PACKAGE__->mk_accessors( qw(
-    base_url indices_ref properties_ref title_info
-    service_doc_fetched
-) );
+__PACKAGE__->mk_accessors(
+    qw(
+        base_url indices_ref properties_ref title_info
+        service_doc_fetched
+        )
+);
 
 =head1 NAME
 
@@ -68,11 +70,11 @@ This method will connect to the Lucene Web Service located at C<$url>.
 =cut
 
 sub new {
-    my( $class, $url ) = @_;
-    
+    my ( $class, $url ) = @_;
+
     croak( "No URL specified" ) unless $url;
 
-    if( !ref $url ) {
+    if ( !ref $url ) {
         $url =~ s{/?$}{/};
         $url = URI->new( $url );
     }
@@ -80,7 +82,7 @@ sub new {
     my $self = $class->SUPER::new;
     $self->base_url( $url );
     $self->indices_ref( {} );
-    
+
     return $self;
 }
 
@@ -95,16 +97,17 @@ Retuens an L<WebService::Lucene::Index> object for C<$name>.
 =cut
 
 sub get_index {
-    my( $self, $name ) = @_;
-    my $indices_ref    = $self->indices_ref;
+    my ( $self, $name ) = @_;
+    my $indices_ref = $self->indices_ref;
 
     return $name if Scalar::Util::blessed $name;
 
-    if( ref $name ) {
-        $name = join( ',', map { Scalar::Util::blessed $_ ? $_->name : $_ } @$name );
+    if ( ref $name ) {
+        $name = join( ',',
+            map { Scalar::Util::blessed $_ ? $_->name : $_ } @$name );
     }
 
-    if( my $index = $indices_ref->{ $name } ) {
+    if ( my $index = $indices_ref->{ $name } ) {
         return $index;
     }
 
@@ -112,10 +115,9 @@ sub get_index {
     my $urlname = $name;
     $urlname =~ s{/?$}{/};
     $indices_ref->{ $name } = WebService::Lucene::Index->new(
-        URI->new_abs( $urlname, $self->base_url )
-    );
+        URI->new_abs( $urlname, $self->base_url ) );
 
-    return $indices_ref->{ $name };    
+    return $indices_ref->{ $name };
 }
 
 =head2 indexes( )
@@ -129,10 +131,11 @@ Returns an array of L<WebService::Lucene::Index> objects.
 =cut
 
 *indexes = \&indices;
+
 sub indices {
     my $self = shift;
 
-    if( !$self->service_doc_fetched ) {
+    if ( !$self->service_doc_fetched ) {
         $self->_fetch_service_document;
     }
 
@@ -151,13 +154,12 @@ Hash reference to a list of properties for the service.
 sub properties {
     my $self = shift;
 
-    if( !$self->properties_ref ) {
+    if ( !$self->properties_ref ) {
         $self->_fetch_service_properties;
     }
 
     return $self->properties_ref;
 }
-
 
 =head2 _fetch_service_properties( )
 
@@ -167,10 +169,9 @@ to C<_parse_service_properties>.
 =cut
 
 sub _fetch_service_properties {
-    my( $self ) = @_;
-    my $entry   = $self->getEntry(
-        URI->new_abs( 'service.properties', $self->base_url )
-    );
+    my ( $self ) = @_;
+    my $entry = $self->getEntry(
+        URI->new_abs( 'service.properties', $self->base_url ) );
     $self->_parse_service_properties( $entry->content->body );
 }
 
@@ -181,13 +182,13 @@ Parses the XML and populates the object's C<properties>
 =cut
 
 sub _parse_service_properties {
-    my( $self, $xml ) = @_;
+    my ( $self, $xml ) = @_;
 
-    $self->properties_ref( {
-        map {
-            $_->{ name } => $_->{ value }
-        } WebService::Lucene::XOXOParser->parse( $xml )
-    } );
+    $self->properties_ref(
+        {   map { $_->{ name } => $_->{ value } }
+                WebService::Lucene::XOXOParser->parse( $xml )
+        }
+    );
 }
 
 =head2 _fetch_service_document( )
@@ -198,10 +199,9 @@ C<_parse_service_document>.
 =cut
 
 sub _fetch_service_document {
-    my( $self ) = @_;
+    my ( $self ) = @_;
     $self->_parse_service_document(
-        $self->_fetch_content( $self->base_url )
-    );
+        $self->_fetch_content( $self->base_url ) );
     $self->service_doc_fetched( 1 );
 }
 
@@ -213,19 +213,20 @@ the service's C<indices>.
 =cut
 
 sub _parse_service_document {
-    my( $self, $xml ) = @_;
-    
+    my ( $self, $xml ) = @_;
+
     my $parser  = XML::LibXML->new;
     my $doc     = $parser->parse_string( $xml );
     my $indices = $self->indices_ref;
 
-    my( $workspace ) = $doc->documentElement->getChildrenByTagName( 'workspace' );
+    my ( $workspace )
+        = $doc->documentElement->getChildrenByTagName( 'workspace' );
 
     $self->title_info( $workspace->getAttributeNode( 'title' )->value );
 
     for my $collection ( $workspace->getChildrenByTagName( 'collection' ) ) {
-        my $url     = $collection->getAttributeNode( 'href' )->value;
-        my( $name ) = $url =~ m{/([^/]+)/?$};
+        my $url = $collection->getAttributeNode( 'href' )->value;
+        my ( $name ) = $url =~ m{/([^/]+)/?$};
         next if exists $indices->{ $name };
         $indices->{ $name } = WebService::Lucene::Index->new( $url );
     }
@@ -238,9 +239,9 @@ Accessor for the title of the service.
 =cut
 
 sub title {
-    my( $self ) = @_;
+    my ( $self ) = @_;
 
-    if( !$self->service_doc_fetched ) {
+    if ( !$self->service_doc_fetched ) {
         $self->_fetch_service_document;
     }
 
@@ -254,10 +255,10 @@ Shortcut for fetching the content at C<$url>.
 =cut
 
 sub _fetch_content {
-    my( $self, $url ) = @_;
-    
+    my ( $self, $url ) = @_;
+
     my $response = $self->{ ua }->get( $url );
-    
+
     return $response->content;
 }
 
@@ -269,7 +270,7 @@ L<WebService::Lucene::Index> object.
 =cut
 
 sub create_index {
-    my( $self, $name ) = @_;
+    my ( $self, $name ) = @_;
     my $index = $self->get_index( $name );
     return $index->create;
 }
@@ -281,7 +282,7 @@ Deletes an index.
 =cut
 
 sub delete_index {
-    my( $self, $name ) = @_;
+    my ( $self, $name ) = @_;
     my $index = $self->get_index( $name );
     return $index->delete;
 }
@@ -293,11 +294,9 @@ Updates the C<service.properties> document.
 =cut
 
 sub update {
-    my( $self ) = @_;
-    $self->updateEntry(
-        URI->new_abs( 'service.properties', $self->base_url ),
-        $self->_properties_as_entry
-    );
+    my ( $self ) = @_;
+    $self->updateEntry( URI->new_abs( 'service.properties', $self->base_url ),
+        $self->_properties_as_entry );
 }
 
 =head2 _properties_as_entry( )
@@ -308,18 +307,19 @@ the C<service.properties> document.
 =cut
 
 sub _properties_as_entry {
-    my( $self ) = @_;
-    
+    my ( $self ) = @_;
+
     my $entry = XML::Atom::Entry->new;
     $entry->title( 'service.properties' );
-    
-    my $props      = $self->properties_ref;
-    my @properties = map +{ name => $_, value => $props->{ $_ } }, keys %$props;
-    my $xml        = WebService::Lucene::XOXOParser->construct( @properties );
-    
+
+    my $props = $self->properties_ref;
+    my @properties = map +{ name => $_, value => $props->{ $_ } },
+        keys %$props;
+    my $xml = WebService::Lucene::XOXOParser->construct( @properties );
+
     $entry->content( $xml );
     $entry->content->type( 'xhtml' );
-    
+
     return $entry;
 }
 
@@ -333,7 +333,7 @@ L<WebService::Lucene::Results> object.
 =cut
 
 sub search {
-    my( $self, $name, @rest ) = @_;
+    my ( $self, $name, @rest ) = @_;
     return $self->get_index( $name )->search( @rest );
 }
 
@@ -347,7 +347,7 @@ L<WebService::Lucene::Results> object.
 =cut
 
 sub facets {
-    my( $self, $name, @rest ) = @_;
+    my ( $self, $name, @rest ) = @_;
     return $self->get_index( $name )->facets( @rest );
 }
 
@@ -365,13 +365,9 @@ sub facets {
 
 =head1 AUTHORS
 
-=over 4
+Brian Cassidy E<lt>bricas@cpan.orgE<gt>
 
-=item * Brian Cassidy E<lt>brian.cassidy@nald.caE<gt>
-
-=item * Adam Paynter E<lt>adam.paynter@nald.caE<gt>
-
-=back
+Adam Paynter E<lt>adapay@cpan.orgE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

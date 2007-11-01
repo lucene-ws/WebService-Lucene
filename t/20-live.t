@@ -13,7 +13,7 @@ use_ok( 'WebService::Lucene::Document' );
 use_ok( 'WebService::Lucene::Exception' );
 
 my $index_name = '_temp' . $$;
-my $service = WebService::Lucene->new( $ENV{ LUCENE_SERVER } );
+my $service    = WebService::Lucene->new( $ENV{ LUCENE_SERVER } );
 isa_ok( $service, 'WebService::Lucene' );
 
 # fetch service properties
@@ -25,7 +25,7 @@ isa_ok( $service, 'WebService::Lucene' );
     is( $properties->{ $index_name }, 1 );
     delete $properties->{ $index_name };
     $service->update;
-    ok( ! defined $properties->{ $index_name } );
+    ok( !defined $properties->{ $index_name } );
 }
 
 my $index = $service->create_index( $index_name );
@@ -41,6 +41,7 @@ isa_ok( $index, 'WebService::Lucene::Index' );
 # fetch index properties
 {
     my $properties = $index->properties;
+
     # new indices have no properties!
     ok( !keys %$properties );
     $properties->{ $index_name } = 1;
@@ -48,7 +49,7 @@ isa_ok( $index, 'WebService::Lucene::Index' );
     is( $properties->{ $index_name }, 1 );
     delete $properties->{ $index_name };
     $index->update;
-    ok( ! defined $properties->{ $index_name } );
+    ok( !defined $properties->{ $index_name } );
 }
 
 # fetch OSD
@@ -69,7 +70,7 @@ isa_ok( $index, 'WebService::Lucene::Index' );
 my $doc = WebService::Lucene::Document->new;
 isa_ok( $doc, 'WebService::Lucene::Document' );
 
-$doc->add_keyword( id  => 1 );
+$doc->add_keyword( id => 1 );
 is( $doc->id, 1 );
 $doc->add_text( foo => 'bar' );
 is( $doc->foo, 'bar' );
@@ -77,15 +78,15 @@ is( $doc->foo, 'bar' );
 $index->add_document( $doc );
 
 my $doc1 = $index->get_document( 1 );
-is( $doc1->id, 1 );
+is( $doc1->id,  1 );
 is( $doc1->foo, 'bar' );
 
 # list of document
 {
     my $results = $index->list;
     my @docs    = $results->documents;
-    is( scalar @docs, 1 );
-    is( $docs[ 0 ]->id, 1 );
+    is( scalar @docs,    1 );
+    is( $docs[ 0 ]->id,  1 );
     is( $docs[ 0 ]->foo, 'bar' );
 }
 
@@ -100,10 +101,11 @@ is( $doc1->foo, 'bar' );
 
 # search for document
 {
-    my $results = $service->search( $index_name, 'bar', { 'lucene:defaultField' => 'foo' } );
-    my @docs    = $results->documents;
-    is( scalar @docs, 1 );
-    is( $docs[ 0 ]->id, 1 );
+    my $results = $service->search( $index_name, 'bar',
+        { 'lucene:defaultField' => 'foo' } );
+    my @docs = $results->documents;
+    is( scalar @docs,    1 );
+    is( $docs[ 0 ]->id,  1 );
     is( $docs[ 0 ]->foo, 'bar' );
 }
 
@@ -115,7 +117,8 @@ is( $doc1->foo, 'bar' );
 
     $index->add_document( $doc2 );
 
-    my $res = $index->search( 'bar', { count => 1, 'lucene:defaultField' => 'foo' } );
+    my $res = $index->search( 'bar',
+        { count => 1, 'lucene:defaultField' => 'foo' } );
     {
         my @docs = $res->documents;
         is( scalar @docs, 1 );

@@ -68,9 +68,9 @@ use_ok( 'WebService::Lucene::Field' );
         my @fields = $doc->fields( $type );
         is( scalar @fields, 1 );
         isa_ok( $fields[ 0 ], 'WebService::Lucene::Field' );
-        is( $fields[ 0 ]->name, $type );
+        is( $fields[ 0 ]->name,  $type );
         is( $fields[ 0 ]->value, "value" );
-        is( $fields[ 0 ]->type, $type );
+        is( $fields[ 0 ]->type,  $type );
     }
 }
 
@@ -98,8 +98,8 @@ use_ok( 'WebService::Lucene::Field' );
         my @fields = $doc->fields;
         is( scalar @fields, 1 );
         isa_ok( $fields[ 0 ], 'WebService::Lucene::Field' );
-        is( $fields[ 0 ]->name, 'name' );
+        is( $fields[ 0 ]->name,  'name' );
         is( $fields[ 0 ]->value, 'value' );
-        is( $fields[ 0 ]->type, 'text' );
+        is( $fields[ 0 ]->type,  'text' );
     }
 }

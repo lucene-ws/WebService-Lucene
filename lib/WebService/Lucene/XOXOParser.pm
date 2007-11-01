@@ -45,8 +45,8 @@ Creates a new parser instance.
 =cut
 
 sub new {
-    my( $class ) = @_;
-    return bless { }, $class;
+    my ( $class ) = @_;
+    return bless {}, $class;
 }
 
 =head2 parse( $xml )
@@ -57,15 +57,15 @@ property.
 =cut
 
 sub parse {
-    my( $self, $xml ) = @_;
-    
-    my $parser  = XML::LibXML->new;
-    my $root    = $parser->parse_string( $xml )->documentElement;
-    my @nodes   = $root->findnodes( '//dt | //dd' );
+    my ( $self, $xml ) = @_;
+
+    my $parser = XML::LibXML->new;
+    my $root   = $parser->parse_string( $xml )->documentElement;
+    my @nodes  = $root->findnodes( '//dt | //dd' );
 
     my @properties;
     while ( @nodes ) {
-        my( $term, $value ) = ( shift( @nodes ), shift( @nodes ) );
+        my ( $term, $value ) = ( shift( @nodes ), shift( @nodes ) );
 
         my $property = {
             name  => $term->textContent,
@@ -87,36 +87,32 @@ an XOXO XML structure.
 =cut
 
 sub construct {
-    my( $self, @properties ) = @_;
+    my ( $self, @properties ) = @_;
 
     return dl(
-    { class => 'xoxo' },
+        { class => 'xoxo' },
         map {
             my $node = $_;
-            dt(
-                {
-                    map {
-                        $_ => $node->{ $_ }
-                    } grep { $_ !~ /^(name|value)$/ } keys %$_
+            dt( {   map { $_ => $node->{ $_ } }
+                        grep { $_ !~ /^(name|value)$/ } keys %$_
                 },
                 $self->encode_entities( $_->{ name } )
-            ),
-            dd(
-                $self->encode_entities( $_->{ value } )
-            )
-        } @properties
+                ),
+                dd( $self->encode_entities( $_->{ value } ) )
+            } @properties
     );
 }
 
 sub _make_element {
     my $element = shift;
     my $output  = "<$element";
-    if( ref $_[ 0 ] ) {
+    if ( ref $_[ 0 ] ) {
         my $attrs = shift;
-        $output  .= ' ';
-        $output  .= join( ' ', map { qq($_=") . $attrs->{ $_ } . '"' } keys %$attrs );
+        $output .= ' ';
+        $output .= join( ' ',
+            map { qq($_=") . $attrs->{ $_ } . '"' } keys %$attrs );
     }
-    $output    .= join( '', '>', @_, "</$element>" );
+    $output .= join( '', '>', @_, "</$element>" );
     return $output;
 }
 
@@ -127,10 +123,10 @@ Escapes some chars to their entities.
 =cut
 
 sub encode_entities {
-    my $self  =  shift;
-    my $value =  shift;
-    $value    =~ s/($pattern)/&$pattern_lut{$1};/gso;
-    
+    my $self  = shift;
+    my $value = shift;
+    $value =~ s/($pattern)/&$pattern_lut{$1};/gso;
+
     return $value;
 }
 

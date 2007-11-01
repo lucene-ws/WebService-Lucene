@@ -14,13 +14,11 @@ isa_ok( $parser, 'WebService::Lucene::XOXOParser' );
 <dl class="xoxo"><dt class="1">a</dt><dd>b</dd><dt class="2">c</dt><dd>d</dd></dl>
 
     my $expected = [
-        {
-            name  => 'a',
+        {   name  => 'a',
             value => 'b',
             class => '1',
         },
-        {
-            name  => 'c',
+        {   name  => 'c',
             value => 'd',
             class => '2',
         },
@@ -35,13 +33,11 @@ isa_ok( $parser, 'WebService::Lucene::XOXOParser' );
 <dl class="xoxo"><dt class="1">a</dt><dd>b</dd><dt class="2">c</dt><dd>d</dd></dl>
 
     my $data = [
-        {
-            name  => 'a',
+        {   name  => 'a',
             value => 'b',
             class => '1',
         },
-        {
-            name  => 'c',
+        {   name  => 'c',
             value => 'd',
             class => '2',
         },
@@ -65,7 +61,10 @@ isa_ok( $parser, 'WebService::Lucene::XOXOParser' );
     );
 
     for my $value ( keys %table ) {
-        is( $parser->encode_entities( $value ), $table{ $value }, "encode: $value" );
+        is( $parser->encode_entities( $value ),
+            $table{ $value },
+            "encode: $value"
+        );
     }
 }
 
@@ -74,8 +73,7 @@ isa_ok( $parser, 'WebService::Lucene::XOXOParser' );
 <dl class="xoxo"><dt class="x">&amp;&lt;&gt;&quot;&apos;</dt><dd>&amp;&lt;&gt;&quot;&apos;</dd></dl>
 
     my $data = [
-        {
-            name  => q(&<>"'),
+        {   name  => q(&<>"'),
             value => q(&<>"'),
             class => 'x',
         },

@@ -15,9 +15,11 @@ use HTTP::Request;
 use WWW::OpenSearch;
 use Encode ();
 
-__PACKAGE__->mk_accessors( qw(
-    base_url name properties_ref _opensearch_client
-) );
+__PACKAGE__->mk_accessors(
+    qw(
+        base_url name properties_ref _opensearch_client
+        )
+);
 
 =head1 NAME
 
@@ -57,21 +59,21 @@ not actually create the index -- see C<create> to do that.
 =cut
 
 sub new {
-    my( $class, $url ) = @_;
+    my ( $class, $url ) = @_;
 
     croak( "No URL specified" ) unless $url;
 
-    if( !ref $url ) {
+    if ( !ref $url ) {
         $url =~ s{/?$}{/};
         $url = URI->new( $url );
     }
 
-    my( $name ) = $url =~ m{/([^/]+)/?$};
+    my ( $name ) = $url =~ m{/([^/]+)/?$};
 
     my $self = $class->SUPER::new;
     $self->base_url( $url );
     $self->name( $name );
-    
+
     return $self;
 }
 
@@ -92,7 +94,7 @@ Accessor for the index's properties.
 sub properties {
     my $self = shift;
 
-    if( !$self->properties_ref ) {
+    if ( !$self->properties_ref ) {
         $self->_fetch_index_properties;
     }
 
@@ -107,10 +109,9 @@ to C<_parse_index_properties>.
 =cut
 
 sub _fetch_index_properties {
-    my( $self ) = @_;
-    my $entry   = $self->getEntry(
-        URI->new_abs( 'index.properties', $self->base_url )
-    );
+    my ( $self ) = @_;
+    my $entry = $self->getEntry(
+        URI->new_abs( 'index.properties', $self->base_url ) );
     $self->_parse_index_properties( $entry->content->body );
 }
 
@@ -121,11 +122,13 @@ Parses the XOXO document and sets the C<properties> accessor.
 =cut
 
 sub _parse_index_properties {
-    my( $self, $xml ) = @_;
+    my ( $self, $xml ) = @_;
 
-    $self->properties_ref( {
-        map { $_->{ name } => $_->{ value } } WebService::Lucene::XOXOParser->parse( $xml )
-    } );
+    $self->properties_ref(
+        {   map { $_->{ name } => $_->{ value } }
+                WebService::Lucene::XOXOParser->parse( $xml )
+        }
+    );
 }
 
 =head2 delete( )
@@ -135,7 +138,7 @@ Deletes the current index.
 =cut
 
 sub delete {
-    my( $self ) = @_;
+    my ( $self ) = @_;
     $self->deleteEntry( $self->base_url );
 }
 
@@ -146,11 +149,9 @@ Updates the C<index.properties> file with the current set of properties.
 =cut
 
 sub update {
-    my( $self ) = @_;
-    $self->updateEntry(
-        URI->new_abs( 'index.properties', $self->base_url ),
-        $self->_properties_as_entry
-    );
+    my ( $self ) = @_;
+    $self->updateEntry( URI->new_abs( 'index.properties', $self->base_url ),
+        $self->_properties_as_entry );
 }
 
 =head2 facets( $facets, [$params] )
@@ -163,9 +164,9 @@ string arguments.
 =cut
 
 sub facets {
-    my( $self, $facet, $params ) = @_;
+    my ( $self, $facet, $params ) = @_;
 
-    my $name   = ref $facet ? join( ',', @$facet ) : $facet;
+    my $name = ref $facet ? join( ',', @$facet ) : $facet;
     my $client = $self->opensearch_client;
 
     my $os_url = $client->description->get_best_url;
@@ -173,8 +174,7 @@ sub facets {
     $url->path( $url->path . "/facets/$name" );
 
     return WebService::Lucene::Results->new_from_feed(
-        $self->getFeed( $url )
-    );
+        $self->getFeed( $url ) );
 }
 
 =head2 list( [$params] )
@@ -184,10 +184,11 @@ Returns a L<WebService::Lucene::Results> object with a list of the recently upda
 =cut
 
 sub list {
-    my( $self, $params ) = @_;
+    my ( $self, $params ) = @_;
     my $url = $self->base_url->clone;
     $url->query_form( $params ) if $params;
-    return WebService::Lucene::Results->new_from_feed( $self->getFeed( $url ) );
+    return WebService::Lucene::Results->new_from_feed(
+        $self->getFeed( $url ) );
 }
 
 =head2 optimize( )
@@ -197,7 +198,7 @@ Optimizes the index.
 =cut
 
 sub optimize {
-    my( $self ) = @_;
+    my ( $self ) = @_;
     my $request = HTTP::Request->new( PUT => $self->base_url . '?optimize' );
     return $self->make_request( $request );
 }
@@ -209,9 +210,9 @@ Sends a create query to the server for the given index.
 =cut
 
 sub create {
-    my( $self ) = @_;
-    my $name    = $self->name;
-    my $url     = $self->base_url;
+    my ( $self ) = @_;
+    my $name     = $self->name;
+    my $url      = $self->base_url;
 
     $url =~ s{$name/?$}{};
 
@@ -227,7 +228,7 @@ Adds C<$document> to the index.
 =cut
 
 sub add_document {
-    my( $self, $document ) = @_;
+    my ( $self, $document ) = @_;
     $document->base_url( URI->new_abs( 'new', $self->base_url ) );
     return $document->create;
 }
@@ -239,7 +240,7 @@ Returns a L<WebService::Lucene::Document>.
 =cut
 
 sub get_document {
-    my( $self, $id ) = @_;
+    my ( $self, $id ) = @_;
     my $entry = $self->getEntry( URI->new_abs( $id, $self->base_url ) );
 
     return WebService::Lucene::Document->new_from_entry( $entry );
@@ -252,7 +253,7 @@ Deletes a document from the index
 =cut
 
 sub delete_document {
-    my( $self, $id ) = @_;
+    my ( $self, $id ) = @_;
     my $document = WebService::Lucene::Document->new;
 
     $document->base_url( URI->new_abs( $id, $self->base_url ) );
@@ -266,18 +267,19 @@ Constructs an L<XML::Atom::Entry> object representing the index's properties.
 =cut
 
 sub _properties_as_entry {
-    my( $self ) = @_;
-    
+    my ( $self ) = @_;
+
     my $entry = XML::Atom::Entry->new;
     $entry->title( $self->name );
-    
-    my $props      = $self->properties_ref;
-    my @properties = map +{ name => $_, value => $props->{ $_ } }, keys %$props;
-    my $xml        = WebService::Lucene::XOXOParser->construct( @properties );
-    
+
+    my $props = $self->properties_ref;
+    my @properties = map +{ name => $_, value => $props->{ $_ } },
+        keys %$props;
+    my $xml = WebService::Lucene::XOXOParser->construct( @properties );
+
     $entry->content( $xml );
     $entry->content->type( 'xhtml' );
-    
+
     return $entry;
 }
 
@@ -288,13 +290,13 @@ returns an WWW::OpenSearch object for the index.
 =cut
 
 sub opensearch_client {
-    my( $self ) = @_;
+    my ( $self ) = @_;
 
-    if( !$self->_opensearch_client ) {
+    if ( !$self->_opensearch_client ) {
         $self->_opensearch_client(
-            WWW::OpenSearch->new( URI->new_abs(
-                'opensearchdescription.xml', $self->base_url
-            ) )
+            WWW::OpenSearch->new(
+                URI->new_abs( 'opensearchdescription.xml', $self->base_url )
+            )
         );
     }
 
@@ -309,7 +311,7 @@ a hashref.
 =cut
 
 sub search {
-    my( $self, $query, $params ) = @_;
+    my ( $self, $query, $params ) = @_;
 
     my $client = $self->opensearch_client;
 
@@ -327,16 +329,16 @@ True if the index exists on the server, otherwise false is returned.
 =cut
 
 sub exists {
-    my( $self ) = @_;
-    my $request  = HTTP::Request->new(HEAD => $self->base_url);
+    my ( $self ) = @_;
+    my $request = HTTP::Request->new( HEAD => $self->base_url );
     my $response = eval { $self->make_request( $request ); };
 
-    if( my $e = WebService::Lucene::Exception->caught ) {
+    if ( my $e = WebService::Lucene::Exception->caught ) {
         return 0 if $e->response->code eq '404';
         $e->rethrow;
-    }    
-    
-    return 1; 
+    }
+
+    return 1;
 }
 
 =head1 AUTHORS
