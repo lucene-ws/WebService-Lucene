@@ -88,7 +88,7 @@ use WWW::OpenSearch::Response;
 {
     my $xml = <<'';
 <?xml version="1.0" encoding="UTF-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom" xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:relevance="http://a9.com/-/opensearch/extensions/relevance/1.0/">
     <opensearch:totalResults>20</opensearch:totalResults>
     <opensearch:startIndex>1</opensearch:startIndex>
     <opensearch:itemsPerPage>10</opensearch:itemsPerPage>
@@ -112,7 +112,7 @@ use WWW::OpenSearch::Response;
         <updated>2006-01-26T16:37:44-04:00</updated>
         <id>http://localhost:8080/lucene/test/1/</id>
         <summary>Test Document 1</summary>
-        <opensearch:relevance>1.0</opensearch:relevance>
+        <relevance:score>1.0</relevance:score>
         <content type="xhtml">
             <div xmlns="http://www.w3.org/1999/xhtml">
                 <dl class="xoxo">
