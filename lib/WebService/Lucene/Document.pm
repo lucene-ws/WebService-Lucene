@@ -86,7 +86,7 @@ sub new_from_entry {
     }
 
     $self->relevance(
-        $entry->get( 'http://a9.com/-/spec/opensearch/1.1/', 'relevance' ) );
+        $entry->get( 'http://a9.com/-/opensearch/extensions/relevance/1.0/', 'score' ) );
     $self->title( $entry->title );
     my $content = $entry->content->body;
 
