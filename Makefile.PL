@@ -10,6 +10,7 @@ all_from 'lib/WebService/Lucene.pm';
 
 requires 'Class::Accessor';
 requires 'Data::Page';
+requires 'Digest::SHA1'; # for XML::Atom::Client
 requires 'Encode';
 requires 'Exception::Class';
 requires 'Scalar::Util';
