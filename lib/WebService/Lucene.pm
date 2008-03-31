@@ -222,7 +222,7 @@ sub _parse_service_document {
     my ( $workspace )
         = $doc->documentElement->getChildrenByTagName( 'workspace' );
 
-	my( $title ) = $workspace->getElementsByLocalName( 'title' );
+    my( $title ) = $workspace->getElementsByLocalName( 'title' );
     $self->title_info( $title->textContent );
 
     for my $collection ( $workspace->getChildrenByTagName( 'collection' ) ) {
