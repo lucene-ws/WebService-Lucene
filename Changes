@@ -1,5 +1,9 @@
 Revision history for Perl extension WebService::Lucene
 
+0.08  Tue Apr 08 2008
+    - The title of an index in the service document is now an element and
+      not an attribute
+
 0.07  Mon Feb 25 2008
     - Added Digest::SHA1 to prereqs as it is optional for XML::Atom, but
       required for XML::Atom::Client

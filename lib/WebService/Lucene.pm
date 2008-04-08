@@ -12,7 +12,7 @@ use WebService::Lucene::XOXOParser;
 use XML::LibXML;
 use Scalar::Util ();
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 __PACKAGE__->mk_accessors(
     qw(
