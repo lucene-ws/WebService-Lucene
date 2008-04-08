@@ -1,4 +1,4 @@
-use inc::Module::Install 0.68;
+use inc::Module::Install 0.71;
 
 if ( -e 'MANIFEST.SKIP' ) {
     system( 'pod2text lib/WebService/Lucene.pm > README' );
