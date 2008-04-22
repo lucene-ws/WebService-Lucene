@@ -1,5 +1,8 @@
 Revision history for Perl extension WebService::Lucene
 
+0.09  Tue Apr 22 2008
+    - fix WebService::Lucene::Document::fields() in scalar context
+
 0.08  Tue Apr 08 2008
     - The title of an index in the service document is now an element and
       not an attribute

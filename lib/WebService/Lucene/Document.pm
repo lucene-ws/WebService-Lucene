@@ -198,7 +198,8 @@ sub fields {
 
     if ( $name ) {
         my $fields = $fieldsref->{ $name };
-        return ( defined $fields ) ? @$fields : ();
+        return () unless defined $fields;
+        return wantarray ? @$fields : $fields->[ 0 ];
     }
 
     return map { @{ $fieldsref->{ $_ } } } keys %$fieldsref;

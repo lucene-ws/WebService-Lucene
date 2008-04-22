@@ -76,7 +76,7 @@ sub new_from_feed {
 
 =head2 new_from_opensearch( $opensearch )
 
-Generates a results object from an L<WWW::OpenSearch::Results> object.
+Generates a results object from an L<WWW::OpenSearch::Response> object.
 
 =cut
 
