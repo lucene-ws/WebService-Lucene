@@ -1,5 +1,8 @@
 Revision history for Perl extension WebService::Lucene
 
+0.10  Thu Nov 19 2009
+    - repackaged with a new version of Module::Install
+
 0.09  Tue Apr 22 2008
     - fix WebService::Lucene::Document::fields() in scalar context
 

@@ -1,4 +1,4 @@
-use inc::Module::Install 0.71;
+use inc::Module::Install 0.91;
 
 if ( -e 'MANIFEST.SKIP' ) {
     system( 'pod2text lib/WebService/Lucene.pm > README' );
@@ -21,5 +21,4 @@ requires 'XML::LibXML';
 
 test_requires 'Test::More';
 
-auto_install;
 WriteAll;
